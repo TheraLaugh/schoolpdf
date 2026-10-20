@@ -3,750 +3,1021 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة إدارة نموذج التقييم — GitHub</title>
+<title>لوحة الإدارة — نموذج التقييم</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: 'Segoe UI', Tahoma, 'Amiri', Arial, sans-serif;
-    direction: rtl; text-align: right;
-    background: #eceff3; color: #1c2833; line-height: 1.65; font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #0f172a; color: #e2e8f0; min-height: 100vh; line-height: 1.6;
   }
   .topbar {
-    background: linear-gradient(135deg, #1a5276, #2874a6);
-    color: #fff; padding: 14px 24px;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; background: #1e293b; border-bottom: 1px solid #334155;
+    position: sticky; top: 0; z-index: 50; flex-wrap: wrap; gap: 12px;
   }
-  .topbar h1 { margin: 0; font-size: 18px; }
-  .topbar .meta { font-size: 12px; opacity: .85; }
-  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
-  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
-  .panel {
-    background: #fff; border-radius: 8px; padding: 16px 18px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; }
+  .brand .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
-  .panel h2 { margin: 0 0 12px; font-size: 15px; color: #1a5276; border-bottom: 1px solid #e5e8ec; padding-bottom: 8px; }
-  .panel h3 { margin: 12px 0 6px; font-size: 13.5px; color: #21618c; }
-  label { display: block; font-size: 12.5px; color: #566573; margin: 8px 0 3px; font-weight: 600; }
-  input[type=text], input[type=password], textarea, select {
-    width: 100%; padding: 8px 10px; border: 1px solid #c7d0d8; border-radius: 5px;
-    font-family: inherit; font-size: 13.5px; background: #fbfcfd; color: #1c2833;
+  .status {
+    display: flex; gap: 16px; font-size: 12px; color: #94a3b8; align-items: center;
   }
-  input:focus, textarea:focus { outline: none; border-color: #2874a6; box-shadow: 0 0 0 2px rgba(40,116,166,0.15); }
-  textarea { resize: vertical; min-height: 60px; }
+  .status .item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #64748b; }
+  .dot.ok { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+  .dot.dirty { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: pulse 1s infinite alternate; }
+  .dot.err { background: #ef4444; }
+  @keyframes pulse { from { opacity: .4 } to { opacity: 1 } }
+
+  .icon-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 14px; padding: 24px; max-width: 1300px; margin: 0 auto;
+  }
+  .icon-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 14px;
+    padding: 22px 12px 18px; cursor: pointer; text-align: center;
+    transition: all .2s ease; display: flex; flex-direction: column;
+    align-items: center; gap: 10px; color: inherit;
+    font-family: inherit; font-size: 13.5px;
+  }
+  .icon-card:hover {
+    background: #334155; border-color: #6366f1; transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(99,102,241,0.25);
+  }
+  .icon-card .icon { font-size: 34px; line-height: 1; }
+  .icon-card .label { font-weight: 600; color: #cbd5e1; }
+  .icon-card .sub { font-size: 11px; color: #64748b; }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(2,6,23,0.82);
+    backdrop-filter: blur(4px); z-index: 100; padding: 20px; overflow-y: auto;
+  }
+  .modal-backdrop.show { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
+  .modal {
+    background: #1e293b; border-radius: 16px; width: 100%; max-width: 720px;
+    border: 1px solid #334155; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    max-height: calc(100vh - 80px); display: flex; flex-direction: column;
+    animation: modalIn .22s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .modal.md { max-width: 720px; }
+  .modal.lg { max-width: 1000px; }
+  .modal.xl { max-width: 1300px; height: calc(100vh - 80px); }
+  .modal-header {
+    display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+    border-bottom: 1px solid #334155;
+  }
+  .modal-header .mh-icon { font-size: 24px; }
+  .modal-header h3 { margin: 0; font-size: 16px; flex: 1; color: #f1f5f9; }
+  .close-btn {
+    background: transparent; border: none; color: #94a3b8; font-size: 22px;
+    cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1;
+  }
+  .close-btn:hover { background: #334155; color: #f1f5f9; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+  /* Form controls */
+  label.fld-label { display: block; font-size: 12px; color: #94a3b8; margin: 12px 0 6px; font-weight: 600; }
+  input[type=text], input[type=password], input[type=number], textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid #475569; border-radius: 8px;
+    background: #0f172a; color: #e2e8f0; font-family: inherit; font-size: 13.5px;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+  }
+  textarea { resize: vertical; min-height: 80px; }
   textarea.code {
     font-family: 'Consolas', 'Menlo', monospace; direction: ltr; text-align: left;
-    min-height: 420px; font-size: 12.5px; line-height: 1.55;
+    min-height: 320px; font-size: 12.5px; line-height: 1.55;
   }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hint { font-size: 11.5px; color: #64748b; margin-top: 4px; }
+
   .btn {
-    display: inline-block; padding: 9px 18px; border: none; border-radius: 5px;
-    background: #2874a6; color: #fff; font-family: inherit; font-size: 13.5px;
-    cursor: pointer; margin: 4px 4px 4px 0; transition: background .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 8px; border: 1px solid transparent;
+    font-family: inherit; font-size: 13.5px; cursor: pointer;
+    background: #334155; color: #e2e8f0; transition: background .15s;
   }
-  .btn:hover { background: #1a5276; }
-  .btn:disabled { background: #b0bec5; cursor: not-allowed; }
-  .btn-success { background: #229954; }
-  .btn-success:hover { background: #1e8449; }
-  .btn-danger { background: #c0392b; }
-  .btn-danger:hover { background: #a93226; }
-  .btn-ghost { background: #ecf0f1; color: #2c3e50; }
-  .btn-ghost:hover { background: #dfe6e9; }
-  .statusbar {
-    display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 14px;
-    background: #f4f6f8; border: 1px solid #e1e5ea; border-radius: 6px;
-    font-size: 12.5px; color: #566573; margin-bottom: 12px;
+  .btn:hover { background: #475569; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-success { background: #22c55e; color: #052e16; }
+  .btn-success:hover { background: #16a34a; }
+  .btn-danger  { background: #ef4444; color: #fff; }
+  .btn-danger:hover  { background: #dc2626; }
+  .btn-ghost   { background: transparent; border-color: #475569; }
+  .btn-ghost:hover { background: #334155; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+  /* Domain editor card */
+  .domain-card {
+    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+    padding: 12px; margin: 10px 0; position: relative;
   }
-  .statusbar .dot {
-    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
-    background: #95a5a6; margin-left: 5px; vertical-align: middle;
+  .domain-card .dom-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
   }
-  .statusbar .dot.ok { background: #27ae60; }
-  .statusbar .dot.dirty { background: #e67e22; animation: pulse 1s infinite alternate; }
-  .statusbar .dot.err { background: #e74c3c; }
-  @keyframes pulse { from { opacity: .4; } to { opacity: 1; } }
-  .log {
-    background: #1b2631; color: #aed6f1; padding: 10px 12px;
-    border-radius: 6px; max-height: 180px; overflow-y: auto;
-    font-family: 'Consolas', monospace; font-size: 12px; direction: ltr; text-align: left;
+  .domain-card .dom-index {
+    background: #6366f1; color: #fff; border-radius: 6px; padding: 2px 9px;
+    font-size: 11.5px; font-weight: 700;
   }
-  .log-entry { padding: 2px 0; }
-  .log-entry.log-err { color: #f5b7b1; }
-  .log-entry.log-ok { color: #a9dfbf; }
-  .log-entry.log-warn { color: #f8c471; }
-  .json-err { color: #c0392b; font-size: 12px; margin-top: 6px; min-height: 16px; font-weight: 600; }
-  .json-ok { color: #229954; font-size: 12px; margin-top: 6px; font-weight: 600; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #e5e8ec; }
-  .tab {
-    padding: 8px 16px; cursor: pointer; border: none; background: transparent;
-    font-family: inherit; font-size: 13.5px; color: #566573; border-bottom: 2px solid transparent;
+  .remove-btn {
+    background: transparent; border: 1px solid #7f1d1d; color: #fca5a5;
+    border-radius: 6px; padding: 3px 9px; font-size: 11.5px; cursor: pointer;
   }
-  .tab.active { color: #1a5276; border-bottom-color: #1a5276; font-weight: 600; }
-  iframe.preview { width: 100%; height: 620px; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; }
-  .hint { font-size: 12px; color: #7f8c8d; margin-top: 4px; }
-  .warn-box {
-    background: #fff8e1; border: 1px solid #ffe082; border-right: 4px solid #f39c12;
-    padding: 10px 12px; border-radius: 5px; margin: 10px 0; font-size: 12.5px; color: #7e5109;
+  .remove-btn:hover { background: #7f1d1d; color: #fff; }
+  .add-btn {
+    background: #1e40af; border: 1px dashed #6366f1; color: #93c5fd;
+    border-radius: 8px; padding: 10px; width: 100%; cursor: pointer;
+    font-family: inherit; font-size: 13px; margin-top: 8px;
   }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .add-btn:hover { background: #1e3a8a; }
+
+  /* Theme cards */
+  .theme-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+  }
+  .theme-card {
+    border: 2px solid #334155; border-radius: 10px; overflow: hidden;
+    cursor: pointer; transition: all .15s; background: #0f172a;
+  }
+  .theme-card:hover { border-color: #475569; }
+  .theme-card.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+  .theme-card .tp {
+    height: 100px; padding: 10px; font-size: 9px; position: relative;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .theme-card .tp .bar { height: 6px; border-radius: 2px; }
+  .theme-card .tp .tbl { border-collapse: collapse; width: 100%; margin-top: 4px; }
+  .theme-card .tp .tbl td { border: 1px solid; padding: 2px 4px; font-size: 8px; }
+  .theme-card .tname {
+    text-align: center; padding: 6px; background: #1e293b; font-size: 12px;
+    font-weight: 600; color: #cbd5e1; border-top: 1px solid #334155;
+  }
+
+  .toast-root { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 11px 20px; border-radius: 8px; background: #1e293b;
+    border: 1px solid #475569; color: #e2e8f0; font-size: 13.5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastIn .22s ease;
+  }
+  .toast.ok  { border-color: #22c55e; }
+  .toast.err { border-color: #ef4444; }
+  .toast.warn { border-color: #f59e0b; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  iframe.preview-frame {
+    width: 100%; height: calc(100vh - 190px); border: none;
+    background: #fff; border-radius: 8px;
+  }
+
+  .ai-prompt-box {
+    background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+    padding: 14px; font-family: 'Consolas', monospace; direction: ltr; text-align: left;
+    max-height: 380px; overflow-y: auto; white-space: pre-wrap;
+    font-size: 12.5px; line-height: 1.6; color: #cbd5e1;
+  }
+
+  @media (max-width: 640px) {
+    .icon-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding: 14px; }
+    .icon-card { padding: 16px 8px; }
+    .icon-card .icon { font-size: 26px; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <h1>🔐 لوحة إدارة نموذج التقييم</h1>
-  <div class="meta">تحكم مباشر عبر GitHub API</div>
-</div>
-
-<div class="layout">
-
-  <!-- العمود الأيمن: الإعدادات والمحرر -->
-  <div>
-    <div class="panel">
-      <h2>1) إعدادات GitHub</h2>
-      <div class="warn-box">
-        التوكن يُحفظ في <strong>localStorage</strong> على جهازك فقط، ولا يُرسل إلا إلى <code>api.github.com</code>.
-        استخدم Fine-grained token بصلاحية <em>Contents: Read and write</em> على المستودع المحدد فقط.
-      </div>
-      <label>GitHub Personal Access Token</label>
-      <input type="password" id="cfg-token" placeholder="github_pat_..." autocomplete="off">
-      <div class="grid-2">
-        <div><label>Owner (اسم المستخدم أو المنظمة)</label><input type="text" id="cfg-owner" placeholder="username"></div>
-        <div><label>Repository</label><input type="text" id="cfg-repo" placeholder="teacher-eval"></div>
-      </div>
-      <div class="grid-2">
-        <div><label>Branch</label><input type="text" id="cfg-branch" value="main"></div>
-        <div><label>File path</label><input type="text" id="cfg-path" value="index.html"></div>
-      </div>
-      <div class="toolbar">
-        <button class="btn btn-ghost" onclick="saveConfig()">💾 حفظ الإعدادات</button>
-        <button class="btn btn-ghost" onclick="clearConfig()">🗑 مسح الإعدادات</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>2) الإجراءات</h2>
-      <div class="statusbar" id="statusbar">
-        <span>الحالة: <span class="dot" id="dot"></span><span id="status-text">غير مُحمَّل</span></span>
-        <span>SHA: <code id="sha-val">—</code></span>
-        <span>Dirty: <strong id="dirty-val">لا</strong></span>
-      </div>
-      <div class="toolbar">
-        <button class="btn" id="btn-load-gh" onclick="loadFromGitHub()">⬇ تحميل من GitHub</button>
-        <button class="btn btn-ghost" onclick="loadLocalFile()">📂 استيراد ملف HTML محلي</button>
-        <button class="btn btn-ghost" onclick="resetToLoaded()">↺ إعادة تعيين من الملف المُحمَّل</button>
-      </div>
-      <div class="toolbar">
-        <button class="btn btn-success" id="btn-save-gh" onclick="saveToGitHub()">⬆ حفظ إلى GitHub</button>
-        <button class="btn" onclick="downloadHtml()">💾 تنزيل HTML محلياً</button>
-        <button class="btn btn-danger" onclick="revertAll()">✖ إلغاء جميع التعديلات</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>3) حقول سريعة (Meta)</h2>
-      <label>عنوان النموذج</label>
-      <input type="text" id="qf-title">
-      <div class="grid-2">
-        <div><label>العام الدراسي (سطر العنوان)</label><input type="text" id="qf-year"></div>
-        <div><label>تاريخ التقييم (سطر العنوان)</label><input type="text" id="qf-date"></div>
-      </div>
-      <div class="hint">هذه الحقول تُحدّث كائن JSON مباشرة وتظهر في المعاينة فوراً.</div>
-    </div>
-
-    <div class="panel">
-      <h2>4) المحرر</h2>
-      <div class="tabs">
-        <button class="tab active" data-tab="form" onclick="switchTab('form')">📋 نموذج مُبسَّط</button>
-        <button class="tab" data-tab="json" onclick="switchTab('json')">🧩 JSON متقدم</button>
-      </div>
-
-      <div id="tab-form">
-        <div id="form-editor"></div>
-      </div>
-
-      <div id="tab-json" style="display:none">
-        <label>محتوى JSON (يُحقن داخل <code>&lt;script id="app-data"&gt;</code> عند الحفظ)</label>
-        <textarea id="json-editor" class="code" spellcheck="false"></textarea>
-        <div id="json-status" class="json-ok">جاهز.</div>
-        <div class="toolbar">
-          <button class="btn btn-ghost" onclick="formatJson()">🎨 تنسيق</button>
-          <button class="btn btn-ghost" onclick="applyJson()">✅ تطبيق على المعاينة</button>
-          <button class="btn btn-ghost" onclick="refreshJsonFromState()">↻ إعادة تحميل من الحالة الحالية</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>5) سجل العمليات</h2>
-      <div class="log" id="log"></div>
-    </div>
+  <div class="brand">
+    <div class="logo">⚙</div>
+    <span>لوحة الإدارة</span>
   </div>
-
-  <!-- العمود الأيسر: المعاينة -->
-  <div>
-    <div class="panel">
-      <h2>👁 المعاينة المباشرة</h2>
-      <iframe class="preview" id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
-    </div>
+  <div class="status">
+    <div class="item"><span class="dot" id="stDot"></span><span id="stText">لم يتم التحميل</span></div>
+    <div class="item">SHA: <code id="stSha" style="color:#93c5fd">—</code></div>
+    <div class="item">تعديلات غير محفوظة: <strong id="stDirty" style="color:#22c55e">لا</strong></div>
   </div>
 </div>
+
+<div class="icon-grid" id="iconGrid"></div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <span class="mh-icon" id="mhIcon"></span>
+      <h3 id="mhTitle"></h3>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast-root" id="toastRoot"></div>
 
 <script>
 (function () {
   'use strict';
 
-  /* ---------------- الحالة ---------------- */
+  /* ============ الحالة ============ */
   var state = {
-    rawHtml: null,      // النص الكامل لملف index.html كما حُمِّل
-    sha: null,          // SHA لملف GitHub
-    savedData: null,    // آخر بيانات محمَّلة/محفوظة
-    currentData: null,  // البيانات الحالية المعدَّلة
-    config: { token: '', owner: '', repo: '', branch: 'main', path: 'index.html' },
-    activeTab: 'form'
+    rawHtml: null,
+    sha: null,
+    savedData: null,
+    currentData: null,
+    config: { token: '', owner: 'TheraLaugh', repo: '', branch: 'main', path: 'index.html' }
   };
 
-  /* ---------------- أدوات مساعدة ---------------- */
+  /* ============ أدوات ============ */
   function $(id) { return document.getElementById(id); }
-
-  function log(msg, type) {
-    type = type || 'info';
-    var logEl = $('log');
-    var entry = document.createElement('div');
-    entry.className = 'log-entry log-' + type;
-    var t = new Date().toLocaleTimeString('ar-EG', { hour12: false });
-    entry.textContent = '[' + t + '] ' + msg;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  function setStatus(text, cls) {
-    $('status-text').textContent = text;
-    var dot = $('dot');
-    dot.className = 'dot ' + (cls || '');
-  }
-
-  function updateMeta() {
-    var dirty = isDirty();
-    $('dirty-val').textContent = dirty ? 'نعم' : 'لا';
-    $('dirty-val').style.color = dirty ? '#e67e22' : '#229954';
-    $('sha-val').textContent = state.sha ? state.sha.substring(0, 7) : '—';
-  }
-
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function isDirty() {
     if (!state.savedData || !state.currentData) return false;
     try { return JSON.stringify(state.savedData) !== JSON.stringify(state.currentData); }
     catch (e) { return false; }
   }
-
-  function clone(o) { return JSON.parse(JSON.stringify(o)); }
-
-  /* ---------------- Base64 Unicode ---------------- */
-  function b64EncodeUnicode(str) {
-    var bytes = new TextEncoder().encode(str);
-    var binary = '';
-    var chunk = 0x8000;
-    for (var i = 0; i < bytes.length; i += chunk) {
-      binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
-    }
-    return btoa(binary);
+  function toast(msg, type) {
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type || 'ok');
+    t.textContent = msg;
+    $('toastRoot').appendChild(t);
+    setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2600);
+    setTimeout(function () { t.remove(); }, 3000);
   }
-  function b64DecodeUnicode(b64) {
-    var binary = atob(String(b64).replace(/\s/g, ''));
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  function updateStatus(text, cls) {
+    $('stText').textContent = text;
+    $('stDot').className = 'dot ' + (cls || '');
+    $('stSha').textContent = state.sha ? state.sha.substring(0, 7) : '—';
+    var dirty = isDirty();
+    $('stDirty').textContent = dirty ? 'نعم' : 'لا';
+    $('stDirty').style.color = dirty ? '#f59e0b' : '#22c55e';
+    if (dirty) { $('stDot').className = 'dot dirty'; }
+  }
+  function b64Encode(str) {
+    var bytes = new TextEncoder().encode(str), bin = '', chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk)
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
+    return btoa(bin);
+  }
+  function b64Decode(b64) {
+    var bin = atob(String(b64).replace(/\s/g, ''));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return new TextDecoder().decode(bytes);
   }
-
-  /* ---------------- حقن/استخراج البيانات ---------------- */
   function extractData(html) {
     var m = html.match(/<script\s+id="app-data"\s+type="application\/json"[^>]*>([\s\S]*?)<\/script>/i);
-    if (!m) throw new Error('لم يتم العثور على كتلة app-data في ملف HTML');
+    if (!m) throw new Error('لم يتم العثور على كتلة app-data');
     return JSON.parse(m[1]);
   }
   function injectData(html, data) {
-    var serialized = JSON.stringify(data, null, 2)
-      .replace(/</g, '\\u003c')
-      .replace(/>/g, '\\u003e')
-      .replace(/&/g, '\\u0026');
+    var json = JSON.stringify(data, null, 2)
+      .replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
     return html.replace(
       /(<script\s+id="app-data"\s+type="application\/json"[^>]*>)[\s\S]*?(<\/script>)/i,
-      function (m, open, close) { return open + '\n' + serialized + '\n' + close; }
+      function (m, o, c) { return o + '\n' + json + '\n' + c; }
     );
   }
 
-  /* ---------------- الإعدادات ---------------- */
+  /* ============ إعدادات محفوظة ============ */
   function loadConfig() {
     try {
-      var saved = localStorage.getItem('admin_config_v1');
-      if (saved) state.config = Object.assign(state.config, JSON.parse(saved));
+      var s = localStorage.getItem('evalAdminCfg_v2');
+      if (s) state.config = Object.assign(state.config, JSON.parse(s));
     } catch (e) {}
-    $('cfg-token').value  = state.config.token  || '';
-    $('cfg-owner').value  = state.config.owner  || '';
-    $('cfg-repo').value   = state.config.repo   || '';
-    $('cfg-branch').value = state.config.branch || 'main';
-    $('cfg-path').value   = state.config.path   || 'index.html';
-  }
-  function readConfigFromForm() {
-    state.config = {
-      token:  $('cfg-token').value.trim(),
-      owner:  $('cfg-owner').value.trim(),
-      repo:   $('cfg-repo').value.trim(),
-      branch: $('cfg-branch').value.trim() || 'main',
-      path:   $('cfg-path').value.trim()   || 'index.html'
-    };
-    return state.config;
   }
   function saveConfig() {
-    readConfigFromForm();
-    localStorage.setItem('admin_config_v1', JSON.stringify(state.config));
-    log('تم حفظ إعدادات GitHub محلياً.', 'ok');
+    localStorage.setItem('evalAdminCfg_v2', JSON.stringify(state.config));
   }
-  function clearConfig() {
-    localStorage.removeItem('admin_config_v1');
-    state.config = { token: '', owner: '', repo: '', branch: 'main', path: 'index.html' };
-    loadConfig();
-    log('تم مسح الإعدادات.', 'warn');
+  function ensureInit() {
+    if (!state.currentData) {
+      state.currentData = getBlankTemplate();
+      state.savedData = clone(state.currentData);
+    }
+  }
+  function getBlankTemplate() {
+    return {
+      meta: { title: "نموذج تقييم الأداء الشامل للمعلمة", schoolYear: "العام الدراسي: ............", evalDate: "تاريخ التقييم: ............" },
+      theme: "classic",
+      basicInfo: { teacherName: "", specialty: "", schoolYear: "", evalDate: "" },
+      gradingKey: "5 = ممتاز | 4 = جيد جداً | 3 = جيد | 2 = مقبول | 1 = ضعيف",
+      sections: [
+        { title: "القسم الأول: التقييم الأكاديمي والتعليمي", maxScore: 50, domains: [] },
+        { title: "القسم الثاني: التقييم الإداري", maxScore: 50, domains: [] }
+      ],
+      criticalRule: "", resultsTitle: "ثالثاً: التقدير العام والنتائج",
+      totalScoreLine: "مجموع الدرجات المستحقة: ......... من 100 درجة",
+      gradeBands: [{ range: "90 - 100", label: "ممتاز" },{ range: "80 - 89", label: "جيد جداً" },{ range: "70 - 79", label: "جيد" },{ range: "50 - 69", label: "مقبول" },{ range: "أقل من 50", label: "ضعيف" }],
+      calcMethod: "كل مجال يُقيّم من 1 إلى 5 ثم يُضرب في 2 للحصول على درجة من 10. مجموع القسمين = 100 درجة.",
+      reportTitle: "رابعاً: التقرير الوصفي والتوصيات",
+      reportSections: [],
+      signaturesTitle: "خامساً: التوقيعات",
+      signatures: [],
+      footer: "مديرة المدرسة"
+    };
   }
 
-  function validateConfig() {
-    var c = readConfigFromForm();
-    if (!c.token)  throw new Error('أدخل GitHub Token');
-    if (!c.owner)  throw new Error('أدخل اسم المستخدم/المنظمة');
-    if (!c.repo)   throw new Error('أدخل اسم المستودع');
-    return c;
+  /* ============ تعريف الأقسام (أيقونات) ============ */
+  var SECTIONS = [
+    { id:'github',   icon:'⚙️', label:'GitHub',       sub:'الإعدادات والمزامنة', build: buildGithub },
+    { id:'basic',    icon:'👤', label:'البيانات',      sub:'المعلمة والعام',       build: buildBasic },
+    { id:'academic', icon:'🏫', label:'الأكاديمي',     sub:'القسم الأول',          build: buildAcademic },
+    { id:'adminsec', icon:'💼', label:'الإداري',       sub:'القسم الثاني',         build: buildAdminSec },
+    { id:'critical', icon:'⚠️', label:'المؤشر الحرج',  sub:'قاعدة تحذيرية',        build: buildCritical },
+    { id:'results',  icon:'📊', label:'النتائج',       sub:'التقدير والنطاقات',    build: buildResults },
+    { id:'report',   icon:'📝', label:'التقرير',       sub:'الوصفي والتوصيات',     build: buildReport },
+    { id:'sig',      icon:'✍️', label:'التوقيعات',     sub:'والتذييل',             build: buildSignatures },
+    { id:'theme',    icon:'🎨', label:'الشكل',         sub:'التصميم والألوان',     build: buildTheme },
+    { id:'preview',  icon:'👁',  label:'المعاينة',     sub:'عرض مباشر',            build: buildPreview },
+    { id:'export',   icon:'📤', label:'التصدير',       sub:'HTML / JSON / PDF',    build: buildExport },
+    { id:'rawjson',  icon:'🧩', label:'JSON خام',      sub:'تحرير متقدم',          build: buildRawJson },
+    { id:'ai',       icon:'🤖', label:'مساعد AI',      sub:'برومبت ولصق',          build: buildAI }
+  ];
+
+  /* ============ شبكة الأيقونات ============ */
+  function renderIconGrid() {
+    var grid = $('iconGrid');
+    grid.innerHTML = '';
+    SECTIONS.forEach(function (sec) {
+      var btn = document.createElement('button');
+      btn.className = 'icon-card';
+      btn.innerHTML = '<div class="icon">' + sec.icon + '</div>' +
+        '<div class="label">' + sec.label + '</div>' +
+        '<div class="sub">' + sec.sub + '</div>';
+      btn.onclick = function () { openSection(sec.id); };
+      grid.appendChild(btn);
+    });
   }
 
-  /* ---------------- GitHub Load ---------------- */
-  async function loadFromGitHub() {
-    var btn = $('btn-load-gh');
-    btn.disabled = true;
-    setStatus('جارٍ التحميل...', '');
-    log('بدء التحميل من GitHub...');
-    try {
-      var c = validateConfig();
-      var url = 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' +
-                encodeURIComponent(c.repo) + '/contents/' + encodeURIComponent(c.path) +
-                '?ref=' + encodeURIComponent(c.branch);
-      var res = await fetch(url, {
-        headers: {
-          'Authorization': 'Bearer ' + c.token,
-          'Accept': 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
+  /* ============ نظام النوافذ ============ */
+  function openSection(id) {
+    var sec = SECTIONS.find(function (s) { return s.id === id; });
+    if (!sec) return;
+    ensureInit();
+    $('mhIcon').textContent = sec.icon;
+    $('mhTitle').textContent = sec.label;
+    $('modalBox').className = 'modal ' + (sec.id === 'preview' ? 'xl' : (sec.id === 'academic' || sec.id === 'adminsec' || sec.id === 'theme' || sec.id === 'ai' ? 'lg' : 'md'));
+    var body = $('modalBody');
+    body.innerHTML = '';
+    var result = sec.build();
+    if (typeof result === 'string') body.innerHTML = result;
+    else if (result instanceof Node) body.appendChild(result);
+    $('modalBackdrop').classList.add('show');
+  }
+  function closeModal() {
+    $('modalBackdrop').classList.remove('show');
+  }
+  window.closeModal = closeModal;
+  $('modalBackdrop').addEventListener('click', function (e) {
+    if (e.target === $('modalBackdrop')) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  /* ============ أدوات بناء النماذج ============ */
+  function fieldRow(labelText, value, onInput, opts) {
+    opts = opts || {};
+    var wrap = document.createElement('div');
+    var lbl = document.createElement('label');
+    lbl.className = 'fld-label';
+    lbl.textContent = labelText;
+    wrap.appendChild(lbl);
+    var inp;
+    if (opts.textarea) {
+      inp = document.createElement('textarea');
+      inp.rows = opts.rows || 3;
+      inp.value = value == null ? '' : value;
+    } else {
+      inp = document.createElement('input');
+      inp.type = opts.type || 'text';
+      inp.value = value == null ? '' : value;
+    }
+    inp.addEventListener('input', function () {
+      onInput(inp.value);
+      updateStatus('تعديل جارٍ', 'dirty');
+    });
+    wrap.appendChild(inp);
+    if (opts.hint) {
+      var h = document.createElement('div'); h.className = 'hint'; h.textContent = opts.hint;
+      wrap.appendChild(h);
+    }
+    return wrap;
+  }
+  function grid2(a, b) {
+    var g = document.createElement('div'); g.className = 'grid-2';
+    g.appendChild(a); g.appendChild(b);
+    return g;
+  }
+  function btn(text, cls, onClick) {
+    var b = document.createElement('button');
+    b.className = 'btn ' + (cls || '');
+    b.textContent = text;
+    b.onclick = onClick;
+    return b;
+  }
+  function btnRow(buttons) {
+    var r = document.createElement('div'); r.className = 'btn-row';
+    buttons.forEach(function (b) { r.appendChild(b); });
+    return r;
+  }
+
+  /* ============ GitHub ============ */
+  function buildGithub() {
+    var d = document.createElement('div');
+    d.innerHTML = '<div style="background:#422006;border:1px solid #78350f;padding:12px;border-radius:8px;font-size:12.5px;color:#fde68a;margin-bottom:14px">' +
+      '🔒 التوكن يُحفظ في متصفحك فقط ولا يُرسل إلا إلى <code>api.github.com</code>. استخدم Fine-grained token بصلاحية <em>Contents: Read and write</em>.' +
+      '</div>';
+    d.appendChild(fieldRow('GitHub Token', state.config.token, function (v) { state.config.token = v; }, { type: 'password', hint: 'يبدأ عادة بـ github_pat_...' }));
+    d.appendChild(grid2(
+      fieldRow('Owner', state.config.owner, function (v) { state.config.owner = v; }),
+      fieldRow('Repository', state.config.repo, function (v) { state.config.repo = v; })
+    ));
+    d.appendChild(grid2(
+      fieldRow('Branch', state.config.branch, function (v) { state.config.branch = v; }),
+      fieldRow('File Path', state.config.path, function (v) { state.config.path = v; })
+    ));
+    d.appendChild(btnRow([
+      btn('💾 حفظ الإعدادات', 'btn-success', function () {
+        saveConfig(); toast('تم حفظ الإعدادات محلياً');
+        updateStatus('الإعدادات محفوظة', 'ok');
+      }),
+      btn('🗑 مسح الإعدادات', 'btn-ghost', function () {
+        if (!confirm('مسح الإعدادات المحفوظة؟')) return;
+        state.config = { token:'', owner:'TheraLaugh', repo:'', branch:'main', path:'index.html' };
+        localStorage.removeItem('evalAdminCfg_v2'); closeModal();
+        toast('تم مسح الإعدادات', 'warn');
+      })
+    ]));
+    d.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid #334155;margin:18px 0';
+    d.appendChild(btnRow([
+      btn('⬇ تحميل من GitHub', 'btn-primary', loadFromGitHub),
+      btn('📂 استيراد ملف محلي', 'btn-ghost', loadLocalFile)
+    ]));
+    d.appendChild(btnRow([
+      btn('⬆ حفظ إلى GitHub', 'btn-success', saveToGitHub),
+      btn('💾 تنزيل index.html', 'btn', downloadHtml),
+      btn('↺ إعادة تعيين من النسخة المحفوظة', 'btn-ghost', function () {
+        if (!confirm('إلغاء التعديلات والعودة لآخر نسخة محفوظة؟')) return;
+        if (!state.savedData) return toast('لا توجد نسخة محفوظة', 'warn');
+        state.currentData = clone(state.savedData);
+        updateStatus('تمت إعادة التعيين', 'ok');
+        toast('تمت إعادة التعيين');
+      })
+    ]));
+    return d;
+  }
+
+  /* ============ البيانات الأساسية ============ */
+  function buildBasic() {
+    var d = document.createElement('div');
+    d.appendChild(fieldRow('عنوان النموذج', state.currentData.meta.title, function (v) { state.currentData.meta.title = v; }));
+    d.appendChild(fieldRow('العام الدراسي (تحت العنوان)', state.currentData.meta.schoolYear, function (v) { state.currentData.meta.schoolYear = v; }));
+    d.appendChild(fieldRow('تاريخ التقييم (تحت العنوان)', state.currentData.meta.evalDate, function (v) { state.currentData.meta.evalDate = v; }));
+    d.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid #334155;margin:18px 0';
+    d.appendChild(fieldRow('اسم المعلمة', state.currentData.basicInfo.teacherName, function (v) { state.currentData.basicInfo.teacherName = v; }));
+    d.appendChild(fieldRow('التخصص / المادة', state.currentData.basicInfo.specialty, function (v) { state.currentData.basicInfo.specialty = v; }));
+    d.appendChild(grid2(
+      fieldRow('العام الدراسي (الجدول)', state.currentData.basicInfo.schoolYear, function (v) { state.currentData.basicInfo.schoolYear = v; }),
+      fieldRow('تاريخ التقييم (الجدول)', state.currentData.basicInfo.evalDate, function (v) { state.currentData.basicInfo.evalDate = v; })
+    ));
+    d.appendChild(fieldRow('مفتاح الدرجات', state.currentData.gradingKey, function (v) { state.currentData.gradingKey = v; }, { textarea: true, rows: 2 }));
+    return d;
+  }
+
+  /* ============ بناء محرر قسم (Academic/Admin) ============ */
+  function buildSectionEditor(secIndex) {
+    var sec = state.currentData.sections[secIndex];
+    var container = document.createElement('div');
+
+    container.appendChild(fieldRow('عنوان القسم', sec.title, function (v) { sec.title = v; }));
+    container.appendChild(fieldRow('الدرجة الكلية للقسم', sec.maxScore, function (v) { sec.maxScore = v; }, { type: 'number' }));
+
+    var domainsHost = document.createElement('div');
+    container.appendChild(domainsHost);
+
+    function renderDomains() {
+      domainsHost.innerHTML = '';
+      (sec.domains || []).forEach(function (dom, di) {
+        var card = document.createElement('div');
+        card.className = 'domain-card';
+        var head = document.createElement('div');
+        head.className = 'dom-header';
+        head.innerHTML = '<span class="dom-index">مجال ' + (di + 1) + '</span>';
+        var rm = document.createElement('button');
+        rm.className = 'remove-btn';
+        rm.textContent = '🗑 حذف';
+        rm.onclick = function () {
+          if (!confirm('حذف هذا المجال؟')) return;
+          sec.domains.splice(di, 1);
+          renderDomains(); updateStatus('تعديل جارٍ', 'dirty');
+        };
+        head.appendChild(rm);
+        card.appendChild(head);
+
+        card.appendChild(fieldRow('اسم المجال', dom.title, function (v) { dom.title = v; }));
+        card.appendChild(grid2(
+          fieldRow('درجة المجال', dom.score, function (v) { dom.score = v; }, { type: 'number' }),
+          (function () {
+            var w = document.createElement('div');
+            w.innerHTML = '<label class="fld-label">عدد المؤشرات</label>' +
+              '<input type="text" value="' + (dom.indicators || []).length + '" disabled style="background:#1e293b;color:#94a3b8">';
+            return w;
+          })()
+        ));
+        card.appendChild(fieldRow('المؤشرات (سطر لكل مؤشر)', (dom.indicators || []).join('\n'), function (v) {
+          dom.indicators = v.split('\n');
+        }, { textarea: true, rows: 4 }));
+
+        domainsHost.appendChild(card);
       });
-      if (!res.ok) {
-        var txt = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + txt.substring(0, 200));
+
+      var addDom = document.createElement('button');
+      addDom.className = 'add-btn';
+      addDom.textContent = '➕ إضافة مجال جديد';
+      addDom.onclick = function () {
+        sec.domains.push({ title: 'مجال جديد', score: 10, indicators: ['مؤشر أول'] });
+        renderDomains(); updateStatus('تعديل جارٍ', 'dirty');
+      };
+      domainsHost.appendChild(addDom);
+    }
+    renderDomains();
+
+    return container;
+  }
+
+  function buildAcademic() { return buildSectionEditor(0); }
+  function buildAdminSec() { return buildSectionEditor(1); }
+
+  /* ============ المؤشر الحرج ============ */
+  function buildCritical() {
+    var d = document.createElement('div');
+    d.appendChild(fieldRow('نص قاعدة المؤشر الحرج', state.currentData.criticalRule, function (v) { state.currentData.criticalRule = v; }, { textarea: true, rows: 6 }));
+    return d;
+  }
+
+  /* ============ النتائج ============ */
+  function buildResults() {
+    var d = document.createElement('div');
+    d.appendChild(fieldRow('عنوان قسم النتائج', state.currentData.resultsTitle, function (v) { state.currentData.resultsTitle = v; }));
+    d.appendChild(fieldRow('سطر مجموع الدرجات', state.currentData.totalScoreLine, function (v) { state.currentData.totalScoreLine = v; }));
+    d.appendChild(fieldRow('طريقة الحساب', state.currentData.calcMethod, function (v) { state.currentData.calcMethod = v; }, { textarea: true, rows: 3 }));
+
+    d.appendChild(document.createElement('h3')).textContent = 'نطاقات التقدير';
+    d.lastChild.style.cssText = 'font-size:14px;color:#93c5fd;margin:18px 0 8px';
+    var bandsHost = document.createElement('div');
+    d.appendChild(bandsHost);
+
+    function renderBands() {
+      bandsHost.innerHTML = '';
+      (state.currentData.gradeBands || []).forEach(function (b, i) {
+        var card = document.createElement('div');
+        card.className = 'domain-card';
+        var head = document.createElement('div');
+        head.className = 'dom-header';
+        head.innerHTML = '<span class="dom-index">نطاق ' + (i + 1) + '</span>';
+        var rm = document.createElement('button'); rm.className = 'remove-btn'; rm.textContent = '🗑 حذف';
+        rm.onclick = function () { state.currentData.gradeBands.splice(i,1); renderBands(); updateStatus('تعديل جارٍ','dirty'); };
+        head.appendChild(rm); card.appendChild(head);
+        card.appendChild(grid2(
+          fieldRow('النطاق', b.range, function (v) { b.range = v; }),
+          fieldRow('التقدير', b.label, function (v) { b.label = v; })
+        ));
+        bandsHost.appendChild(card);
+      });
+      var add = document.createElement('button');
+      add.className = 'add-btn'; add.textContent = '➕ إضافة نطاق';
+      add.onclick = function () { state.currentData.gradeBands.push({ range: '...', label: '...' }); renderBands(); updateStatus('تعديل جارٍ','dirty'); };
+      bandsHost.appendChild(add);
+    }
+    renderBands();
+    return d;
+  }
+
+  /* ============ التقرير ============ */
+  function buildReport() {
+    var d = document.createElement('div');
+    d.appendChild(fieldRow('عنوان قسم التقرير', state.currentData.reportTitle, function (v) { state.currentData.reportTitle = v; }));
+    var listHost = document.createElement('div');
+    d.appendChild(listHost);
+    function renderList() {
+      listHost.innerHTML = '';
+      (state.currentData.reportSections || []).forEach(function (r, i) {
+        var card = document.createElement('div');
+        card.className = 'domain-card';
+        var head = document.createElement('div'); head.className = 'dom-header';
+        head.innerHTML = '<span class="dom-index">بند ' + (i+1) + '</span>';
+        var rm = document.createElement('button'); rm.className='remove-btn'; rm.textContent='🗑 حذف';
+        rm.onclick = function () { state.currentData.reportSections.splice(i,1); renderList(); updateStatus('تعديل جارٍ','dirty'); };
+        head.appendChild(rm); card.appendChild(head);
+        card.appendChild(fieldRow('النص', r, function (v) { state.currentData.reportSections[i] = v; }));
+        listHost.appendChild(card);
+      });
+      var add = document.createElement('button');
+      add.className = 'add-btn'; add.textContent = '➕ إضافة بند';
+      add.onclick = function () { state.currentData.reportSections.push('بند جديد'); renderList(); updateStatus('تعديل جارٍ','dirty'); };
+      listHost.appendChild(add);
+    }
+    renderList();
+    return d;
+  }
+
+  /* ============ التوقيعات ============ */
+  function buildSignatures() {
+    var d = document.createElement('div');
+    d.appendChild(fieldRow('عنوان قسم التوقيعات', state.currentData.signaturesTitle, function (v) { state.currentData.signaturesTitle = v; }));
+    var listHost = document.createElement('div');
+    d.appendChild(listHost);
+    function renderList() {
+      listHost.innerHTML = '';
+      (state.currentData.signatures || []).forEach(function (s, i) {
+        var card = document.createElement('div');
+        card.className = 'domain-card';
+        var head = document.createElement('div'); head.className='dom-header';
+        head.innerHTML = '<span class="dom-index">توقيع ' + (i+1) + '</span>';
+        var rm = document.createElement('button'); rm.className='remove-btn'; rm.textContent='🗑 حذف';
+        rm.onclick = function () { state.currentData.signatures.splice(i,1); renderList(); updateStatus('تعديل جارٍ','dirty'); };
+        head.appendChild(rm); card.appendChild(head);
+        card.appendChild(grid2(
+          fieldRow('الوسم', s.label, function (v) { s.label = v; }),
+          fieldRow('النص الظاهر', s.value, function (v) { s.value = v; })
+        ));
+        listHost.appendChild(card);
+      });
+      var add = document.createElement('button');
+      add.className='add-btn'; add.textContent='➕ إضافة توقيع';
+      add.onclick = function () { state.currentData.signatures.push({ label:'توقيع جديد', value:'...................' }); renderList(); updateStatus('تعديل جارٍ','dirty'); };
+      listHost.appendChild(add);
+    }
+    renderList();
+
+    d.appendChild(document.createElement('hr')).style.cssText='border:none;border-top:1px solid #334155;margin:18px 0';
+    d.appendChild(fieldRow('نص التذييل', state.currentData.footer, function (v) { state.currentData.footer = v; }));
+    return d;
+  }
+
+  /* ============ الشكل والتصميم ============ */
+  var THEMES = [
+    { id:'classic',  name:'كلاسيكي',  p:'#1a5276', a:'#2874a6', th:'#eaf2f8', bg:'#eef1f5' },
+    { id:'modern',   name:'عصري',     p:'#6c5ce7', a:'#a29bfe', th:'#ede9ff', bg:'#f4f2ff' },
+    { id:'minimal',  name:'بسيط',     p:'#2d3436', a:'#636e72', th:'#f5f6fa', bg:'#f8f9fa' },
+    { id:'academic', name:'أكاديمي',  p:'#7b341e', a:'#b7791f', th:'#fdf6e3', bg:'#f4ecd8' },
+    { id:'colorful', name:'مُلوَّن',   p:'#e17055', a:'#0984e3', th:'#ffeaa7', bg:'#fef9ef' },
+    { id:'dark',     name:'داكن',     p:'#74b9ff', a:'#a29bfe', th:'#1e3a8a', bg:'#0f172a', fg:'#e2e8f0' }
+  ];
+  function buildTheme() {
+    var d = document.createElement('div');
+    d.appendChild(document.createElement('p')).textContent = 'اختر شكل النموذج — ينعكس فوراً على المعاينة والملف المصدّر.';
+    d.lastChild.style.cssText = 'color:#94a3b8;font-size:13px;margin-bottom:14px';
+    var grid = document.createElement('div');
+    grid.className = 'theme-grid';
+    THEMES.forEach(function (t) {
+      var card = document.createElement('div');
+      card.className = 'theme-card' + (state.currentData.theme === t.id ? ' selected' : '');
+      card.dataset.theme = t.id;
+      var tp = document.createElement('div');
+      tp.className = 'tp';
+      tp.style.background = t.bg;
+      tp.style.color = t.fg || '#1c2833';
+      tp.innerHTML =
+        '<div class="bar" style="background:' + t.p + ';width:70%"></div>' +
+        '<div class="bar" style="background:' + t.a + ';width:50%"></div>' +
+        '<table class="tbl" style="border-color:' + (t.fg ? '#475569' : '#b0bec5') + ';color:' + (t.fg || '#1c2833') + '">' +
+          '<tr style="background:' + t.th + '"><td style="border-color:' + (t.fg ? '#475569' : '#b0bec5') + ';color:' + t.p + '">عنوان</td><td style="border-color:' + (t.fg ? '#475569' : '#b0bec5') + '">درجة</td></tr>' +
+          '<tr><td style="border-color:' + (t.fg ? '#475569' : '#b0bec5') + '">مؤشر</td><td style="border-color:' + (t.fg ? '#475569' : '#b0bec5') + '">5</td></tr>' +
+        '</table>';
+      card.appendChild(tp);
+      var nm = document.createElement('div'); nm.className = 'tname'; nm.textContent = t.name;
+      card.appendChild(nm);
+      card.onclick = function () {
+        state.currentData.theme = t.id;
+        Array.prototype.forEach.call(grid.children, function (c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
+        updateStatus('تم تغيير الشكل', 'dirty');
+        toast('الشكل: ' + t.name, 'ok');
+      };
+      grid.appendChild(card);
+    });
+    d.appendChild(grid);
+    return d;
+  }
+
+  /* ============ المعاينة ============ */
+  function buildPreview() {
+    var d = document.createElement('div');
+    var iframe = document.createElement('iframe');
+    iframe.className = 'preview-frame';
+    iframe.sandbox = 'allow-scripts allow-same-origin';
+    d.appendChild(iframe);
+    setTimeout(function () {
+      try {
+        var html = state.rawHtml
+          ? injectData(state.rawHtml, state.currentData)
+          : buildStandaloneHtml(state.currentData);
+        iframe.srcdoc = html;
+      } catch (e) {
+        iframe.srcdoc = '<p style="padding:20px;color:red">خطأ في المعاينة: ' + e.message + '</p>';
       }
+    }, 50);
+    return d;
+  }
+  function buildStandaloneHtml(data) {
+    return '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Tahoma,Arial;padding:20px;direction:rtl;text-align:right}</style></head><body>' +
+      '<p>⚠ لا يوجد قالب HTML محمّل. حمّل index.html من GitHub أو محلياً لعرض المعاينة الحقيقية.</p>' +
+      '<pre style="direction:ltr;text-align:left;background:#f5f5f5;padding:12px;border-radius:6px;overflow:auto;font-size:12px">' +
+      JSON.stringify(data, null, 2).replace(/</g,'&lt;') + '</pre></body></html>';
+  }
+
+  /* ============ التصدير ============ */
+  function buildExport() {
+    var d = document.createElement('div');
+    d.appendChild(document.createElement('p')).textContent = 'اختر صيغة التصدير المطلوبة:';
+    d.lastChild.style.cssText = 'color:#94a3b8;font-size:13px;margin-bottom:14px';
+
+    var btns = [
+      { txt: '📄 تحميل index.html (كامل)', cls: 'btn-primary', fn: downloadHtml },
+      { txt: '🧩 تحميل JSON فقط', cls: '', fn: downloadJson },
+      { txt: '🖨 طباعة / حفظ PDF', cls: 'btn-success', fn: printPreview },
+      { txt: '📋 نسخ HTML للحافظة', cls: 'btn-ghost', fn: copyHtml },
+      { txt: '📋 نسخ JSON للحافظة', cls: 'btn-ghost', fn: copyJson }
+    ];
+    var row = document.createElement('div'); row.className = 'btn-row';
+    btns.forEach(function (b) {
+      row.appendChild(btn(b.txt, b.cls, function () { b.fn(); }));
+    });
+    d.appendChild(row);
+
+    d.appendChild(document.createElement('hr')).style.cssText='border:none;border-top:1px solid #334155;margin:18px 0';
+    d.appendChild(document.createElement('p')).textContent = 'معلومات:';
+    d.lastChild.style.cssText = 'color:#94a3b8;font-size:13px;margin-bottom:8px';
+    var info = document.createElement('div');
+    info.style.cssText = 'background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;font-size:12.5px;color:#cbd5e1;line-height:1.8';
+    info.innerHTML =
+      '• حجم JSON: <strong>' + new Blob([JSON.stringify(state.currentData)]).size + '</strong> بايت<br>' +
+      '• عدد الأقسام: <strong>' + (state.currentData.sections || []).length + '</strong><br>' +
+      '• الشكل الحالي: <strong>' + (state.currentData.theme || 'classic') + '</strong><br>' +
+      '• آخر SHA: <code>' + (state.sha ? state.sha.substring(0, 10) : '—') + '</code>';
+    d.appendChild(info);
+    return d;
+  }
+
+  function downloadHtml() {
+    var html = state.rawHtml ? injectData(state.rawHtml, state.currentData) : buildStandaloneHtml(state.currentData);
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'index.html';
+    a.click();
+    toast('تم تنزيل index.html', 'ok');
+  }
+  function downloadJson() {
+    var blob = new Blob([JSON.stringify(state.currentData, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'app-data.json';
+    a.click();
+    toast('تم تنزيل JSON', 'ok');
+  }
+  function printPreview() {
+    var w = window.open('', '_blank');
+    var html = state.rawHtml ? injectData(state.rawHtml, state.currentData) : buildStandaloneHtml(state.currentData);
+    w.document.write(html);
+    w.document.close();
+    setTimeout(function () { w.focus(); w.print(); }, 500);
+  }
+  async function copyHtml() {
+    var html = state.rawHtml ? injectData(state.rawHtml, state.currentData) : buildStandaloneHtml(state.currentData);
+    try { await navigator.clipboard.writeText(html); toast('تم نسخ HTML', 'ok'); }
+    catch (e) { toast('فشل النسخ', 'err'); }
+  }
+  async function copyJson() {
+    try { await navigator.clipboard.writeText(JSON.stringify(state.currentData, null, 2)); toast('تم نسخ JSON', 'ok'); }
+    catch (e) { toast('فشل النسخ', 'err'); }
+  }
+
+  /* ============ JSON خام ============ */
+  function buildRawJson() {
+    var d = document.createElement('div');
+    d.innerHTML = '<div style="background:#422006;border:1px solid #78350f;padding:10px;border-radius:8px;font-size:12.5px;color:#fde68a;margin-bottom:12px">⚠ تحرير متقدم: أي خطأ في JSON سيمنع الحفظ.</div>';
+    var ta = document.createElement('textarea');
+    ta.className = 'code';
+    ta.value = JSON.stringify(state.currentData, null, 2);
+    d.appendChild(ta);
+    var status = document.createElement('div');
+    status.style.cssText = 'font-size:12px;margin-top:8px;min-height:18px';
+    d.appendChild(status);
+    function validate() {
+      try {
+        var v = JSON.parse(ta.value);
+        status.textContent = '✅ JSON صالح';
+        status.style.color = '#22c55e';
+        return v;
+      } catch (e) {
+        status.textContent = '❌ ' + e.message;
+        status.style.color = '#ef4444';
+        return null;
+      }
+    }
+    ta.addEventListener('input', validate);
+    d.appendChild(btnRow([
+      btn('🎨 تنسيق', 'btn-ghost', function () { var v = validate(); if (v) ta.value = JSON.stringify(v, null, 2); }),
+      btn('✅ تطبيق', 'btn-success', function () {
+        var v = validate(); if (!v) return toast('JSON غير صالح', 'err');
+        state.currentData = v; closeModal(); updateStatus('تعديل جارٍ','dirty');
+        toast('تم تطبيق JSON', 'ok');
+      })
+    ]));
+    return d;
+  }
+
+  /* ============ مساعد AI ============ */
+  function buildAIPromptText() {
+    var schema = JSON.stringify(state.currentData, null, 2);
+    return [
+      'أنت مساعد ذكاء اصطناعي متخصص في تعديل نماذج تقييم أداء المعلمة.',
+      '',
+      'السياق:',
+      'يوجد ملف index.html يحتوي على وسم <script id="app-data" type="application/json"> يحمل بيانات النموذج بصيغة JSON. تُحقن التعديلات هناك.',
+      '',
+      'البنية الحالية للبيانات:',
+      '```json',
+      schema,
+      '```',
+      '',
+      'شرح الحقول:',
+      '- meta.title: عنوان النموذج الرئيسي',
+      '- meta.schoolYear: سطر العام الدراسي تحت العنوان',
+      '- meta.evalDate: سطر تاريخ التقييم',
+      '- theme: الشكل (classic | modern | minimal | academic | colorful | dark)',
+      '- basicInfo: اسم المعلمة، التخصص، العام، التاريخ',
+      '- gradingKey: مفتاح الدرجات',
+      '- sections: مصفوفة الأقسام، كل قسم فيه title و maxScore و domains[]',
+      '  - كل domain فيه: title و score و indicators[] (مصفوفة نصوص)',
+      '- criticalRule: نص قاعدة المؤشر الحرج',
+      '- resultsTitle / totalScoreLine / gradeBands[{range,label}] / calcMethod',
+      '- reportTitle / reportSections[]',
+      '- signaturesTitle / signatures[{label,value}]',
+      '- footer: نص التذييل',
+      '',
+      'المطلوب منك:',
+      '[✏️ اكتب طلبك هنا — مثلاً: "أضف مجالاً جديداً في القسم الثاني بعنوان التعاون مع الفريق و3 مؤشرات"، أو "ترجم كل المؤشرات إلى الإنجليزية"، أو "أضف قسمين جديدين عن المهارات الرقمية"]',
+      '',
+      'قواعد الإخراج:',
+      '1. أعد JSON كاملاً وصالحاً فقط، بدون أي شرح قبله أو بعده.',
+      '2. حافظ على جميع المفاتيح الحالية وبنيتها.',
+      '3. تأكد أن النتيجة تمر عبر JSON.parse دون أخطاء.',
+      '4. لا تستخدم أي علامات اقتباس غريبة أو خصائص JSON5.'
+    ].join('\n');
+  }
+  function buildAI() {
+    var d = document.createElement('div');
+    d.innerHTML = '<div style="background:#0c4a6e;border:1px solid #0369a1;padding:12px;border-radius:8px;font-size:12.5px;color:#bae6fd;margin-bottom:14px">' +
+      '🤖 <strong>الطريقة:</strong> انسخ البرومبت → الصقه في ChatGPT/Claude/Gemini مع طلبك → الصق JSON الناتج في الحقل بالأسفل → اضغط تطبيق.' +
+      '</div>';
+
+    var promptBox = document.createElement('div');
+    promptBox.className = 'ai-prompt-box';
+    promptBox.textContent = buildAIPromptText();
+    d.appendChild(promptBox);
+
+    d.appendChild(btnRow([
+      btn('📋 نسخ البرومبت', 'btn-primary', async function () {
+        try { await navigator.clipboard.writeText(buildAIPromptText()); toast('تم نسخ البرومبت', 'ok'); }
+        catch (e) { toast('فشل النسخ', 'err'); }
+      })
+    ]));
+
+    d.appendChild(document.createElement('hr')).style.cssText='border:none;border-top:1px solid #334155;margin:18px 0';
+
+    d.appendChild(document.createElement('label')).textContent = 'الصق JSON الناتج من الذكاء الاصطناعي هنا:';
+    d.lastChild.className = 'fld-label';
+
+    var ta = document.createElement('textarea');
+    ta.className = 'code';
+    ta.style.minHeight = '180px';
+    ta.placeholder = '{\n  "meta": {...},\n  ...\n}';
+    d.appendChild(ta);
+
+    var status = document.createElement('div');
+    status.style.cssText = 'font-size:12px;margin-top:8px;min-height:18px';
+    d.appendChild(status);
+
+    function validate() {
+      try {
+        var v = JSON.parse(ta.value);
+        status.textContent = '✅ صالح — اضغط تطبيق';
+        status.style.color = '#22c55e';
+        return v;
+      } catch (e) {
+        status.textContent = '❌ ' + e.message;
+        status.style.color = '#ef4444';
+        return null;
+      }
+    }
+    ta.addEventListener('input', validate);
+
+    d.appendChild(btnRow([
+      btn('✅ تطبيق JSON من AI', 'btn-success', function () {
+        var v = validate(); if (!v) return toast('JSON غير صالح', 'err');
+        if (!v.meta || !v.sections) return toast('البنية ناقصة — تحقق من meta و sections', 'err');
+        state.currentData = v; closeModal(); updateStatus('تعديل جارٍ','dirty');
+        toast('تم تطبيق رد الذكاء الاصطناعي', 'ok');
+      })
+    ]));
+
+    return d;
+  }
+
+  /* ============ GitHub عمليات ============ */
+  async function loadFromGitHub() {
+    if (!state.config.token || !state.config.owner || !state.config.repo) {
+      return toast('أكمل إعدادات GitHub أولاً', 'warn');
+    }
+    updateStatus('جارٍ التحميل...', '');
+    try {
+      var url = 'https://api.github.com/repos/' + encodeURIComponent(state.config.owner) +
+        '/' + encodeURIComponent(state.config.repo) + '/contents/' +
+        encodeURIComponent(state.config.path) + '?ref=' + encodeURIComponent(state.config.branch);
+      var res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + state.config.token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (await res.text()).substring(0, 200));
       var meta = await res.json();
-      var html;
-      if (meta.content && meta.encoding === 'base64') {
-        html = b64DecodeUnicode(meta.content);
-      } else if (meta.download_url) {
-        var raw = await fetch(meta.download_url);
-        html = await raw.text();
-      } else {
-        throw new Error('لا يمكن قراءة محتوى الملف');
-      }
+      var html = b64Decode(meta.content);
       state.rawHtml = html;
       state.sha = meta.sha;
       state.savedData = extractData(html);
       state.currentData = clone(state.savedData);
-      setStatus('تم التحميل بنجاح', 'ok');
-      log('تم تحميل الملف. SHA=' + meta.sha.substring(0, 7), 'ok');
-      refreshAllUI();
-    } catch (err) {
-      setStatus('فشل التحميل', 'err');
-      log('خطأ: ' + err.message, 'err');
-      alert('فشل التحميل:\n' + err.message);
-    } finally {
-      btn.disabled = false;
+      updateStatus('تم التحميل ✓', 'ok');
+      toast('تم تحميل الملف من GitHub', 'ok');
+      closeModal();
+    } catch (e) {
+      updateStatus('فشل التحميل', 'err');
+      toast('فشل: ' + e.message, 'err');
     }
   }
-
-  /* ---------------- GitHub Save ---------------- */
   async function saveToGitHub() {
-    if (!state.rawHtml) {
-      alert('حمّل ملف index.html أولاً من GitHub أو محلياً.');
-      return;
-    }
-    var newHtml = injectData(state.rawHtml, state.currentData);
-    var btn = $('btn-save-gh');
-    btn.disabled = true;
-    setStatus('جارٍ الحفظ...', '');
-    log('بدء الحفظ إلى GitHub...');
+    if (!state.rawHtml) return toast('حمّل الملف أولاً', 'warn');
+    if (!state.config.token || !state.config.owner || !state.config.repo) return toast('أكمل إعدادات GitHub', 'warn');
+    updateStatus('جارٍ الحفظ...', '');
     try {
-      var c = validateConfig();
-      var url = 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' +
-                encodeURIComponent(c.repo) + '/contents/' + encodeURIComponent(c.path);
+      var newHtml = injectData(state.rawHtml, state.currentData);
+      var url = 'https://api.github.com/repos/' + encodeURIComponent(state.config.owner) +
+        '/' + encodeURIComponent(state.config.repo) + '/contents/' + encodeURIComponent(state.config.path);
       var body = {
-        message: 'تحديث نموذج التقييم — ' + new Date().toISOString(),
-        content: b64EncodeUnicode(newHtml),
-        branch: c.branch
+        message: 'تحديث النموذج — ' + new Date().toISOString(),
+        content: b64Encode(newHtml),
+        branch: state.config.branch
       };
       if (state.sha) body.sha = state.sha;
       var res = await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + c.token,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28'
-        },
+        headers: { 'Authorization': 'Bearer ' + state.config.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
         body: JSON.stringify(body)
       });
-      if (!res.ok) {
-        var txt = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + txt.substring(0, 200));
-      }
-      var result = await res.json();
-      state.sha = result.content.sha;
+      if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (await res.text()).substring(0, 200));
+      var out = await res.json();
+      state.sha = out.content.sha;
       state.savedData = clone(state.currentData);
-      setStatus('تم الحفظ بنجاح', 'ok');
-      log('تم الحفظ. SHA الجديد=' + state.sha.substring(0, 7), 'ok');
-      updateMeta();
-    } catch (err) {
-      setStatus('فشل الحفظ', 'err');
-      log('خطأ في الحفظ: ' + err.message, 'err');
-      alert('فشل الحفظ:\n' + err.message);
-    } finally {
-      btn.disabled = false;
+      updateStatus('تم الحفظ ✓', 'ok');
+      toast('تم الحفظ على GitHub', 'ok');
+    } catch (e) {
+      updateStatus('فشل الحفظ', 'err');
+      toast('فشل: ' + e.message, 'err');
     }
   }
-
-  /* ---------------- تحميل ملف محلي ---------------- */
   function loadLocalFile() {
     var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.html,.htm,text/html';
+    input.type = 'file'; input.accept = '.html,.htm,text/html';
     input.onchange = async function (e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) return;
+      var file = e.target.files[0]; if (!file) return;
       try {
         var html = await file.text();
         state.rawHtml = html;
         state.sha = null;
         state.savedData = extractData(html);
         state.currentData = clone(state.savedData);
-        setStatus('تم تحميل ملف محلي', 'ok');
-        log('استُورد الملف: ' + file.name + ' (SHA غير معروف)', 'warn');
-        refreshAllUI();
-      } catch (err) {
-        log('فشل الاستيراد: ' + err.message, 'err');
-        alert('فشل الاستيراد:\n' + err.message);
-      }
+        updateStatus('تم استيراد ملف محلي', 'ok');
+        toast('استُورد: ' + file.name, 'ok');
+        closeModal();
+      } catch (e) { toast('فشل: ' + e.message, 'err'); }
     };
     input.click();
   }
 
-  function resetToLoaded() {
-    if (!state.savedData) return;
-    if (!confirm('إعادة تعيين كل الحقول إلى آخر بيانات محمَّلة/محفوظة؟')) return;
-    state.currentData = clone(state.savedData);
-    refreshAllUI();
-    log('أُعيدت البيانات إلى آخر نسخة محفوظة.', 'warn');
-  }
-
-  function revertAll() {
-    if (!confirm('إلغاء جميع التعديلات غير المحفوظة والعودة للحالة الأخيرة المحفوظة؟')) return;
-    if (!state.savedData) { log('لا توجد نسخة محفوظة.', 'warn'); return; }
-    state.currentData = clone(state.savedData);
-    refreshAllUI();
-    log('أُلغيت التعديلات.', 'warn');
-  }
-
-  /* ---------------- تنزيل HTML ---------------- */
-  function downloadHtml() {
-    if (!state.rawHtml) { alert('حمّل الملف أولاً.'); return; }
-    var html = injectData(state.rawHtml, state.currentData);
-    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'index.html';
-    a.click();
-    URL.revokeObjectURL(url);
-    log('تم تنزيل index.html محلياً.', 'ok');
-  }
-
-  /* ---------------- التبويبات ---------------- */
-  function switchTab(name) {
-    state.activeTab = name;
-    document.querySelectorAll('.tab').forEach(function (t) {
-      t.classList.toggle('active', t.dataset.tab === name);
-    });
-    $('tab-form').style.display = (name === 'form') ? '' : 'none';
-    $('tab-json').style.display = (name === 'json') ? '' : 'none';
-  }
-
-  /* ---------------- JSON Editor ---------------- */
-  function refreshJsonFromState() {
-    $('json-editor').value = JSON.stringify(state.currentData, null, 2);
-    $('json-status').textContent = 'جاهز.';
-    $('json-status').className = 'json-ok';
-  }
-
-  function formatJson() {
-    try {
-      var v = JSON.parse($('json-editor').value);
-      $('json-editor').value = JSON.stringify(v, null, 2);
-      $('json-status').textContent = '✅ JSON صالح.';
-      $('json-status').className = 'json-ok';
-    } catch (err) {
-      $('json-status').textContent = '❌ ' + err.message;
-      $('json-status').className = 'json-err';
-    }
-  }
-
-  function applyJson() {
-    try {
-      var v = JSON.parse($('json-editor').value);
-      state.currentData = v;
-      $('json-status').textContent = '✅ تم التطبيق على المعاينة.';
-      $('json-status').className = 'json-ok';
-      refreshFormFromState();
-      refreshPreview();
-      updateMeta();
-      log('طُبِّق JSON على الحالة.', 'ok');
-    } catch (err) {
-      $('json-status').textContent = '❌ ' + err.message;
-      $('json-status').className = 'json-err';
-      log('JSON غير صالح: ' + err.message, 'err');
-    }
-  }
-
-  /* ---------------- Form Editor ---------------- */
-  function refreshFormFromState() {
-    var d = state.currentData || {};
-    $('qf-title').value = (d.meta && d.meta.title) || '';
-    $('qf-year').value  = (d.meta && d.meta.schoolYear) || '';
-    $('qf-date').value  = (d.meta && d.meta.evalDate) || '';
-    renderFormEditor();
-  }
-
-  function bindQuickField(id, path, key) {
-    var el = $(id);
-    el.oninput = function () {
-      var v = el.value;
-      var d = state.currentData;
-      if (path === 'meta') { d.meta = d.meta || {}; d.meta[key] = v; }
-      else if (path === 'basicInfo') { d.basicInfo = d.basicInfo || {}; d.basicInfo[key] = v; }
-      onDataChanged();
-    };
-  }
-
-  function onDataChanged() {
-    refreshJsonFromState();
-    refreshPreview();
-    updateMeta();
-  }
-
-  function el(tag, attrs, children) {
-    var e = document.createElement(tag);
-    if (attrs) Object.keys(attrs).forEach(function (k) {
-      if (k === 'text') e.textContent = attrs[k];
-      else if (k === 'class') e.className = attrs[k];
-      else if (k === 'style') e.setAttribute('style', attrs[k]);
-      else if (k.startsWith('data-')) e.setAttribute(k, attrs[k]);
-      else e[k] = attrs[k];
-    });
-    (children || []).forEach(function (c) {
-      if (c == null) return;
-      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-    });
-    return e;
-  }
-
-  function inputField(labelText, value, onInput, opts) {
-    opts = opts || {};
-    var inp = el('input', {
-      type: opts.type || 'text',
-      value: value == null ? '' : value,
-      style: 'width:100%'
-    });
-    inp.addEventListener('input', function () { onInput(inp.value); });
-    var wrap = el('div', { style: 'margin-bottom:10px' });
-    wrap.appendChild(el('label', { text: labelText }));
-    wrap.appendChild(inp);
-    if (opts.hint) wrap.appendChild(el('div', { class: 'hint', text: opts.hint }));
-    return wrap;
-  }
-
-  function textareaField(labelText, value, onInput, rows) {
-    var ta = el('textarea', { style: 'width:100%', rows: rows || 3 });
-    ta.value = value == null ? '' : value;
-    ta.addEventListener('input', function () { onInput(ta.value); });
-    var wrap = el('div', { style: 'margin-bottom:10px' });
-    wrap.appendChild(el('label', { text: labelText }));
-    wrap.appendChild(ta);
-    return wrap;
-  }
-
-  function renderFormEditor() {
-    var host = $('form-editor');
-    host.innerHTML = '';
-    var d = state.currentData;
-    if (!d) { host.appendChild(el('p', { text: 'حمّل الملف أولاً لعرض الحقول.' })); return; }
-
-    // meta
-    var sectionMeta = el('div', {}, [el('h3', { text: 'Meta' })]);
-    sectionMeta.appendChild(inputField('عنوان النموذج', d.meta.title, function (v) { d.meta.title = v; onDataChanged(); }));
-    sectionMeta.appendChild(inputField('العام الدراسي (العنوان)', d.meta.schoolYear, function (v) { d.meta.schoolYear = v; onDataChanged(); }));
-    sectionMeta.appendChild(inputField('تاريخ التقييم (العنوان)', d.meta.evalDate, function (v) { d.meta.evalDate = v; onDataChanged(); }));
-    host.appendChild(sectionMeta);
-
-    // basic info
-    var sectionBasic = el('div', {}, [el('h3', { text: 'البيانات الأساسية' })]);
-    sectionBasic.appendChild(inputField('اسم المعلمة', d.basicInfo.teacherName, function (v) { d.basicInfo.teacherName = v; onDataChanged(); }));
-    sectionBasic.appendChild(inputField('التخصص / المادة', d.basicInfo.specialty, function (v) { d.basicInfo.specialty = v; onDataChanged(); }));
-    sectionBasic.appendChild(inputField('العام الدراسي', d.basicInfo.schoolYear, function (v) { d.basicInfo.schoolYear = v; onDataChanged(); }));
-    sectionBasic.appendChild(inputField('تاريخ التقييم', d.basicInfo.evalDate, function (v) { d.basicInfo.evalDate = v; onDataChanged(); }));
-    host.appendChild(sectionBasic);
-
-    // grading key
-    var sectionKey = el('div', {}, [el('h3', { text: 'مفتاح الدرجات' })]);
-    sectionKey.appendChild(inputField('مفتاح الدرجات', d.gradingKey, function (v) { d.gradingKey = v; onDataChanged(); }));
-    host.appendChild(sectionKey);
-
-    // sections
-    (d.sections || []).forEach(function (sec, si) {
-      var secDiv = el('div', { style: 'border:1px solid #e5e8ec;border-radius:6px;padding:10px;margin:10px 0;background:#fbfcfd' });
-      secDiv.appendChild(el('h3', { text: sec.title || ('قسم ' + (si + 1)) }));
-      secDiv.appendChild(inputField('عنوان القسم', sec.title, function (v) { sec.title = v; onDataChanged(); }));
-      secDiv.appendChild(inputField('الدرجة الكلية للقسم', sec.maxScore, function (v) { sec.maxScore = v; onDataChanged(); }, { type: 'number' }));
-
-      (sec.domains || []).forEach(function (dom, di) {
-        var domDiv = el('div', { style: 'border:1px dashed #c7d0d8;border-radius:5px;padding:10px;margin:8px 0;background:#fff' });
-        domDiv.appendChild(el('div', { style: 'font-weight:700;color:#1a5276;margin-bottom:6px', text: '↳ المجال ' + (di + 1) }));
-        domDiv.appendChild(inputField('عنوان المجال', dom.title, function (v) { dom.title = v; onDataChanged(); }));
-        domDiv.appendChild(inputField('درجة المجال', dom.score, function (v) { dom.score = v; onDataChanged(); }, { type: 'number' }));
-
-        var ta = el('textarea', { style: 'width:100%;min-height:100px;font-family:inherit', rows: 4 });
-        ta.value = (dom.indicators || []).join('\n');
-        ta.addEventListener('input', function () {
-          dom.indicators = ta.value.split('\n').map(function (s) { return s; }).filter(function (s) { return s.trim() !== ''; });
-          onDataChanged();
-        });
-        var taWrap = el('div', { style: 'margin-bottom:8px' });
-        taWrap.appendChild(el('label', { text: 'المؤشرات (مؤشر واحد في كل سطر)' }));
-        taWrap.appendChild(ta);
-        domDiv.appendChild(taWrap);
-
-        secDiv.appendChild(domDiv);
-      });
-      host.appendChild(secDiv);
-    });
-
-    // critical rule
-    var sectionCrit = el('div', {}, [el('h3', { text: 'قاعدة المؤشر الحرج' })]);
-    sectionCrit.appendChild(textareaField('النص', d.criticalRule, function (v) { d.criticalRule = v; onDataChanged(); }, 3));
-    host.appendChild(sectionCrit);
-
-    // results
-    var sectionRes = el('div', {}, [el('h3', { text: 'التقدير العام' })]);
-    sectionRes.appendChild(inputField('عنوان قسم النتائج', d.resultsTitle, function (v) { d.resultsTitle = v; onDataChanged(); }));
-    sectionRes.appendChild(inputField('سطر مجموع الدرجات', d.totalScoreLine, function (v) { d.totalScoreLine = v; onDataChanged(); }));
-    sectionRes.appendChild(textareaField('طريقة الحساب', d.calcMethod, function (v) { d.calcMethod = v; onDataChanged(); }, 2));
-    host.appendChild(sectionRes);
-
-    // report
-    var sectionRep = el('div', {}, [el('h3', { text: 'التقرير الوصفي' })]);
-    sectionRep.appendChild(inputField('عنوان قسم التقرير', d.reportTitle, function (v) { d.reportTitle = v; onDataChanged(); }));
-    (d.reportSections || []).forEach(function (rs, i) {
-      sectionRep.appendChild(inputField('بند ' + (i + 1), rs, function (v) { d.reportSections[i] = v; onDataChanged(); }));
-    });
-    host.appendChild(sectionRep);
-
-    // signatures
-    var sectionSig = el('div', {}, [el('h3', { text: 'التوقيعات' })]);
-    sectionSig.appendChild(inputField('عنوان قسم التوقيعات', d.signaturesTitle, function (v) { d.signaturesTitle = v; onDataChanged(); }));
-    (d.signatures || []).forEach(function (sig, i) {
-      sectionSig.appendChild(inputField('التوقيع ' + (i + 1) + ' — الوسم', sig.label, function (v) { d.signatures[i].label = v; onDataChanged(); }));
-    });
-    host.appendChild(sectionSig);
-
-    // footer
-    var sectionFooter = el('div', {}, [el('h3', { text: 'التذييل' })]);
-    sectionFooter.appendChild(inputField('نص التذييل', d.footer, function (v) { d.footer = v; onDataChanged(); }));
-    host.appendChild(sectionFooter);
-  }
-
-  /* ---------------- المعاينة ---------------- */
-  var previewTimer = null;
-  function refreshPreview() {
-    if (previewTimer) clearTimeout(previewTimer);
-    previewTimer = setTimeout(function () {
-      if (!state.rawHtml || !state.currentData) return;
-      try {
-        var html = injectData(state.rawHtml, state.currentData);
-        $('preview').srcdoc = html;
-      } catch (e) {
-        log('فشل تحديث المعاينة: ' + e.message, 'err');
-      }
-    }, 250);
-  }
-
-  /* ---------------- تحديث شامل ---------------- */
-  function refreshAllUI() {
-    refreshFormFromState();
-    refreshJsonFromState();
-    refreshPreview();
-    updateMeta();
-    updateQuickFields();
-  }
-
-  function updateQuickFields() {
-    var d = state.currentData || {};
-    $('qf-title').value = (d.meta && d.meta.title) || '';
-    $('qf-year').value  = (d.meta && d.meta.schoolYear) || '';
-    $('qf-date').value  = (d.meta && d.meta.evalDate) || '';
-  }
-
-  /* ---------------- ربط الحقول السريعة ---------------- */
-  function bindQuickFields() {
-    $('qf-title').addEventListener('input', function () {
-      if (!state.currentData) return;
-      state.currentData.meta.title = $('qf-title').value;
-      onDataChanged();
-      renderFormEditor();
-    });
-    $('qf-year').addEventListener('input', function () {
-      if (!state.currentData) return;
-      state.currentData.meta.schoolYear = $('qf-year').value;
-      onDataChanged();
-      renderFormEditor();
-    });
-    $('qf-date').addEventListener('input', function () {
-      if (!state.currentData) return;
-      state.currentData.meta.evalDate = $('qf-date').value;
-      onDataChanged();
-      renderFormEditor();
-    });
-  }
-
-  /* ---------------- تهيئة ---------------- */
+  /* ============ التهيئة ============ */
   function init() {
     loadConfig();
-    bindQuickFields();
-    log('جاهز. أدخل إعدادات GitHub ثم اضغط "تحميل من GitHub".');
-    setStatus('بانتظار التحميل', '');
+    ensureInit();
+    renderIconGrid();
+    updateStatus('جاهز', '');
   }
-
-  window.saveConfig = saveConfig;
-  window.clearConfig = clearConfig;
-  window.loadFromGitHub = loadFromGitHub;
-  window.saveToGitHub = saveToGitHub;
-  window.loadLocalFile = loadLocalFile;
-  window.resetToLoaded = resetToLoaded;
-  window.revertAll = revertAll;
-  window.downloadHtml = downloadHtml;
-  window.switchTab = switchTab;
-  window.formatJson = formatJson;
-  window.applyJson = applyJson;
-  window.refreshJsonFromState = refreshJsonFromState;
-
   init();
 })();
 </script>
