@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة إدارة نموذج التقييم — GitHub</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, 'Amiri', Arial, sans-serif;
+    direction: rtl; text-align: right;
+    background: #eceff3; color: #1c2833; line-height: 1.65; font-size: 14px;
+  }
+  .topbar {
+    background: linear-gradient(135deg, #1a5276, #2874a6);
+    color: #fff; padding: 14px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .topbar h1 { margin: 0; font-size: 18px; }
+  .topbar .meta { font-size: 12px; opacity: .85; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: #fff; border-radius: 8px; padding: 16px 18px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 12px; font-size: 15px; color: #1a5276; border-bottom: 1px solid #e5e8ec; padding-bottom: 8px; }
+  .panel h3 { margin: 12px 0 6px; font-size: 13.5px; color: #21618c; }
+  label { display: block; font-size: 12.5px; color: #566573; margin: 8px 0 3px; font-weight: 600; }
+  input[type=text], input[type=password], textarea, select {
+    width: 100%; padding: 8px 10px; border: 1px solid #c7d0d8; border-radius: 5px;
+    font-family: inherit; font-size: 13.5px; background: #fbfcfd; color: #1c2833;
+  }
+  input:focus, textarea:focus { outline: none; border-color: #2874a6; box-shadow: 0 0 0 2px rgba(40,116,166,0.15); }
+  textarea { resize: vertical; min-height: 60px; }
+  textarea.code {
+    font-family: 'Consolas', 'Menlo', monospace; direction: ltr; text-align: left;
+    min-height: 420px; font-size: 12.5px; line-height: 1.55;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn {
+    display: inline-block; padding: 9px 18px; border: none; border-radius: 5px;
+    background: #2874a6; color: #fff; font-family: inherit; font-size: 13.5px;
+    cursor: pointer; margin: 4px 4px 4px 0; transition: background .15s;
+  }
+  .btn:hover { background: #1a5276; }
+  .btn:disabled { background: #b0bec5; cursor: not-allowed; }
+  .btn-success { background: #229954; }
+  .btn-success:hover { background: #1e8449; }
+  .btn-danger { background: #c0392b; }
+  .btn-danger:hover { background: #a93226; }
+  .btn-ghost { background: #ecf0f1; color: #2c3e50; }
+  .btn-ghost:hover { background: #dfe6e9; }
+  .statusbar {
+    display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 14px;
+    background: #f4f6f8; border: 1px solid #e1e5ea; border-radius: 6px;
+    font-size: 12.5px; color: #566573; margin-bottom: 12px;
+  }
+  .statusbar .dot {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    background: #95a5a6; margin-left: 5px; vertical-align: middle;
+  }
+  .statusbar .dot.ok { background: #27ae60; }
+  .statusbar .dot.dirty { background: #e67e22; animation: pulse 1s infinite alternate; }
+  .statusbar .dot.err { background: #e74c3c; }
+  @keyframes pulse { from { opacity: .4; } to { opacity: 1; } }
+  .log {
+    background: #1b2631; color: #aed6f1; padding: 10px 12px;
+    border-radius: 6px; max-height: 180px; overflow-y: auto;
+    font-family: 'Consolas', monospace; font-size: 12px; direction: ltr; text-align: left;
+  }
+  .log-entry { padding: 2px 0; }
+  .log-entry.log-err { color: #f5b7b1; }
+  .log-entry.log-ok { color: #a9dfbf; }
+  .log-entry.log-warn { color: #f8c471; }
+  .json-err { color: #c0392b; font-size: 12px; margin-top: 6px; min-height: 16px; font-weight: 600; }
+  .json-ok { color: #229954; font-size: 12px; margin-top: 6px; font-weight: 600; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #e5e8ec; }
+  .tab {
+    padding: 8px 16px; cursor: pointer; border: none; background: transparent;
+    font-family: inherit; font-size: 13.5px; color: #566573; border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: #1a5276; border-bottom-color: #1a5276; font-weight: 600; }
+  iframe.preview { width: 100%; height: 620px; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; }
+  .hint { font-size: 12px; color: #7f8c8d; margin-top: 4px; }
+  .warn-box {
+    background: #fff8e1; border: 1px solid #ffe082; border-right: 4px solid #f39c12;
+    padding: 10px 12px; border-radius: 5px; margin: 10px 0; font-size: 12.5px; color: #7e5109;
+  }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🔐 لوحة إدارة نموذج التقييم</h1>
+  <div class="meta">تحكم مباشر عبر GitHub API</div>
+</div>
+
+<div class="layout">
+
+  <!-- العمود الأيمن: الإعدادات والمحرر -->
+  <div>
+    <div class="panel">
+      <h2>1) إعدادات GitHub</h2>
+      <div class="warn-box">
+        التوكن يُحفظ في <strong>localStorage</strong> على جهازك فقط، ولا يُرسل إلا إلى <code>api.github.com</code>.
+        استخدم Fine-grained token بصلاحية <em>Contents: Read and write</em> على المستودع المحدد فقط.
+      </div>
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="cfg-token" placeholder="github_pat_..." autocomplete="off">
+      <div class="grid-2">
+        <div><label>Owner (اسم المستخدم أو المنظمة)</label><input type="text" id="cfg-owner" placeholder="username"></div>
+        <div><label>Repository</label><input type="text" id="cfg-repo" placeholder="teacher-eval"></div>
+      </div>
+      <div class="grid-2">
+        <div><label>Branch</label><input type="text" id="cfg-branch" value="main"></div>
+        <div><label>File path</label><input type="text" id="cfg-path" value="index.html"></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn btn-ghost" onclick="saveConfig()">💾 حفظ الإعدادات</button>
+        <button class="btn btn-ghost" onclick="clearConfig()">🗑 مسح الإعدادات</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>2) الإجراءات</h2>
+      <div class="statusbar" id="statusbar">
+        <span>الحالة: <span class="dot" id="dot"></span><span id="status-text">غير مُحمَّل</span></span>
+        <span>SHA: <code id="sha-val">—</code></span>
+        <span>Dirty: <strong id="dirty-val">لا</strong></span>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="btn-load-gh" onclick="loadFromGitHub()">⬇ تحميل من GitHub</button>
+        <button class="btn btn-ghost" onclick="loadLocalFile()">📂 استيراد ملف HTML محلي</button>
+        <button class="btn btn-ghost" onclick="resetToLoaded()">↺ إعادة تعيين من الملف المُحمَّل</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn btn-success" id="btn-save-gh" onclick="saveToGitHub()">⬆ حفظ إلى GitHub</button>
+        <button class="btn" onclick="downloadHtml()">💾 تنزيل HTML محلياً</button>
+        <button class="btn btn-danger" onclick="revertAll()">✖ إلغاء جميع التعديلات</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>3) حقول سريعة (Meta)</h2>
+      <label>عنوان النموذج</label>
+      <input type="text" id="qf-title">
+      <div class="grid-2">
+        <div><label>العام الدراسي (سطر العنوان)</label><input type="text" id="qf-year"></div>
+        <div><label>تاريخ التقييم (سطر العنوان)</label><input type="text" id="qf-date"></div>
+      </div>
+      <div class="hint">هذه الحقول تُحدّث كائن JSON مباشرة وتظهر في المعاينة فوراً.</div>
+    </div>
+
+    <div class="panel">
+      <h2>4) المحرر</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="form" onclick="switchTab('form')">📋 نموذج مُبسَّط</button>
+        <button class="tab" data-tab="json" onclick="switchTab('json')">🧩 JSON متقدم</button>
+      </div>
+
+      <div id="tab-form">
+        <div id="form-editor"></div>
+      </div>
+
+      <div id="tab-json" style="display:none">
+        <label>محتوى JSON (يُحقن داخل <code>&lt;script id="app-data"&gt;</code> عند الحفظ)</label>
+        <textarea id="json-editor" class="code" spellcheck="false"></textarea>
+        <div id="json-status" class="json-ok">جاهز.</div>
+        <div class="toolbar">
+          <button class="btn btn-ghost" onclick="formatJson()">🎨 تنسيق</button>
+          <button class="btn btn-ghost" onclick="applyJson()">✅ تطبيق على المعاينة</button>
+          <button class="btn btn-ghost" onclick="refreshJsonFromState()">↻ إعادة تحميل من الحالة الحالية</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>5) سجل العمليات</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <!-- العمود الأيسر: المعاينة -->
+  <div>
+    <div class="panel">
+      <h2>👁 المعاينة المباشرة</h2>
+      <iframe class="preview" id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- الحالة ---------------- */
+  var state = {
+    rawHtml: null,      // النص الكامل لملف index.html كما حُمِّل
+    sha: null,          // SHA لملف GitHub
+    savedData: null,    // آخر بيانات محمَّلة/محفوظة
+    currentData: null,  // البيانات الحالية المعدَّلة
+    config: { token: '', owner: '', repo: '', branch: 'main', path: 'index.html' },
+    activeTab: 'form'
+  };
+
+  /* ---------------- أدوات مساعدة ---------------- */
+  function $(id) { return document.getElementById(id); }
+
+  function log(msg, type) {
+    type = type || 'info';
+    var logEl = $('log');
+    var entry = document.createElement('div');
+    entry.className = 'log-entry log-' + type;
+    var t = new Date().toLocaleTimeString('ar-EG', { hour12: false });
+    entry.textContent = '[' + t + '] ' + msg;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setStatus(text, cls) {
+    $('status-text').textContent = text;
+    var dot = $('dot');
+    dot.className = 'dot ' + (cls || '');
+  }
+
+  function updateMeta() {
+    var dirty = isDirty();
+    $('dirty-val').textContent = dirty ? 'نعم' : 'لا';
+    $('dirty-val').style.color = dirty ? '#e67e22' : '#229954';
+    $('sha-val').textContent = state.sha ? state.sha.substring(0, 7) : '—';
+  }
+
+  function isDirty() {
+    if (!state.savedData || !state.currentData) return false;
+    try { return JSON.stringify(state.savedData) !== JSON.stringify(state.currentData); }
+    catch (e) { return false; }
+  }
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  /* ---------------- Base64 Unicode ---------------- */
+  function b64EncodeUnicode(str) {
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    var chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
+    }
+    return btoa(binary);
+  }
+  function b64DecodeUnicode(b64) {
+    var binary = atob(String(b64).replace(/\s/g, ''));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  /* ---------------- حقن/استخراج البيانات ---------------- */
+  function extractData(html) {
+    var m = html.match(/<script\s+id="app-data"\s+type="application\/json"[^>]*>([\s\S]*?)<\/script>/i);
+    if (!m) throw new Error('لم يتم العثور على كتلة app-data في ملف HTML');
+    return JSON.parse(m[1]);
+  }
+  function injectData(html, data) {
+    var serialized = JSON.stringify(data, null, 2)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026');
+    return html.replace(
+      /(<script\s+id="app-data"\s+type="application\/json"[^>]*>)[\s\S]*?(<\/script>)/i,
+      function (m, open, close) { return open + '\n' + serialized + '\n' + close; }
+    );
+  }
+
+  /* ---------------- الإعدادات ---------------- */
+  function loadConfig() {
+    try {
+      var saved = localStorage.getItem('admin_config_v1');
+      if (saved) state.config = Object.assign(state.config, JSON.parse(saved));
+    } catch (e) {}
+    $('cfg-token').value  = state.config.token  || '';
+    $('cfg-owner').value  = state.config.owner  || '';
+    $('cfg-repo').value   = state.config.repo   || '';
+    $('cfg-branch').value = state.config.branch || 'main';
+    $('cfg-path').value   = state.config.path   || 'index.html';
+  }
+  function readConfigFromForm() {
+    state.config = {
+      token:  $('cfg-token').value.trim(),
+      owner:  $('cfg-owner').value.trim(),
+      repo:   $('cfg-repo').value.trim(),
+      branch: $('cfg-branch').value.trim() || 'main',
+      path:   $('cfg-path').value.trim()   || 'index.html'
+    };
+    return state.config;
+  }
+  function saveConfig() {
+    readConfigFromForm();
+    localStorage.setItem('admin_config_v1', JSON.stringify(state.config));
+    log('تم حفظ إعدادات GitHub محلياً.', 'ok');
+  }
+  function clearConfig() {
+    localStorage.removeItem('admin_config_v1');
+    state.config = { token: '', owner: '', repo: '', branch: 'main', path: 'index.html' };
+    loadConfig();
+    log('تم مسح الإعدادات.', 'warn');
+  }
+
+  function validateConfig() {
+    var c = readConfigFromForm();
+    if (!c.token)  throw new Error('أدخل GitHub Token');
+    if (!c.owner)  throw new Error('أدخل اسم المستخدم/المنظمة');
+    if (!c.repo)   throw new Error('أدخل اسم المستودع');
+    return c;
+  }
+
+  /* ---------------- GitHub Load ---------------- */
+  async function loadFromGitHub() {
+    var btn = $('btn-load-gh');
+    btn.disabled = true;
+    setStatus('جارٍ التحميل...', '');
+    log('بدء التحميل من GitHub...');
+    try {
+      var c = validateConfig();
+      var url = 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' +
+                encodeURIComponent(c.repo) + '/contents/' + encodeURIComponent(c.path) +
+                '?ref=' + encodeURIComponent(c.branch);
+      var res = await fetch(url, {
+        headers: {
+          'Authorization': 'Bearer ' + c.token,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+      if (!res.ok) {
+        var txt = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + txt.substring(0, 200));
+      }
+      var meta = await res.json();
+      var html;
+      if (meta.content && meta.encoding === 'base64') {
+        html = b64DecodeUnicode(meta.content);
+      } else if (meta.download_url) {
+        var raw = await fetch(meta.download_url);
+        html = await raw.text();
+      } else {
+        throw new Error('لا يمكن قراءة محتوى الملف');
+      }
+      state.rawHtml = html;
+      state.sha = meta.sha;
+      state.savedData = extractData(html);
+      state.currentData = clone(state.savedData);
+      setStatus('تم التحميل بنجاح', 'ok');
+      log('تم تحميل الملف. SHA=' + meta.sha.substring(0, 7), 'ok');
+      refreshAllUI();
+    } catch (err) {
+      setStatus('فشل التحميل', 'err');
+      log('خطأ: ' + err.message, 'err');
+      alert('فشل التحميل:\n' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------------- GitHub Save ---------------- */
+  async function saveToGitHub() {
+    if (!state.rawHtml) {
+      alert('حمّل ملف index.html أولاً من GitHub أو محلياً.');
+      return;
+    }
+    var newHtml = injectData(state.rawHtml, state.currentData);
+    var btn = $('btn-save-gh');
+    btn.disabled = true;
+    setStatus('جارٍ الحفظ...', '');
+    log('بدء الحفظ إلى GitHub...');
+    try {
+      var c = validateConfig();
+      var url = 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' +
+                encodeURIComponent(c.repo) + '/contents/' + encodeURIComponent(c.path);
+      var body = {
+        message: 'تحديث نموذج التقييم — ' + new Date().toISOString(),
+        content: b64EncodeUnicode(newHtml),
+        branch: c.branch
+      };
+      if (state.sha) body.sha = state.sha;
+      var res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + c.token,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        var txt = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + txt.substring(0, 200));
+      }
+      var result = await res.json();
+      state.sha = result.content.sha;
+      state.savedData = clone(state.currentData);
+      setStatus('تم الحفظ بنجاح', 'ok');
+      log('تم الحفظ. SHA الجديد=' + state.sha.substring(0, 7), 'ok');
+      updateMeta();
+    } catch (err) {
+      setStatus('فشل الحفظ', 'err');
+      log('خطأ في الحفظ: ' + err.message, 'err');
+      alert('فشل الحفظ:\n' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------------- تحميل ملف محلي ---------------- */
+  function loadLocalFile() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.html,.htm,text/html';
+    input.onchange = async function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        var html = await file.text();
+        state.rawHtml = html;
+        state.sha = null;
+        state.savedData = extractData(html);
+        state.currentData = clone(state.savedData);
+        setStatus('تم تحميل ملف محلي', 'ok');
+        log('استُورد الملف: ' + file.name + ' (SHA غير معروف)', 'warn');
+        refreshAllUI();
+      } catch (err) {
+        log('فشل الاستيراد: ' + err.message, 'err');
+        alert('فشل الاستيراد:\n' + err.message);
+      }
+    };
+    input.click();
+  }
+
+  function resetToLoaded() {
+    if (!state.savedData) return;
+    if (!confirm('إعادة تعيين كل الحقول إلى آخر بيانات محمَّلة/محفوظة؟')) return;
+    state.currentData = clone(state.savedData);
+    refreshAllUI();
+    log('أُعيدت البيانات إلى آخر نسخة محفوظة.', 'warn');
+  }
+
+  function revertAll() {
+    if (!confirm('إلغاء جميع التعديلات غير المحفوظة والعودة للحالة الأخيرة المحفوظة؟')) return;
+    if (!state.savedData) { log('لا توجد نسخة محفوظة.', 'warn'); return; }
+    state.currentData = clone(state.savedData);
+    refreshAllUI();
+    log('أُلغيت التعديلات.', 'warn');
+  }
+
+  /* ---------------- تنزيل HTML ---------------- */
+  function downloadHtml() {
+    if (!state.rawHtml) { alert('حمّل الملف أولاً.'); return; }
+    var html = injectData(state.rawHtml, state.currentData);
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    log('تم تنزيل index.html محلياً.', 'ok');
+  }
+
+  /* ---------------- التبويبات ---------------- */
+  function switchTab(name) {
+    state.activeTab = name;
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+    $('tab-form').style.display = (name === 'form') ? '' : 'none';
+    $('tab-json').style.display = (name === 'json') ? '' : 'none';
+  }
+
+  /* ---------------- JSON Editor ---------------- */
+  function refreshJsonFromState() {
+    $('json-editor').value = JSON.stringify(state.currentData, null, 2);
+    $('json-status').textContent = 'جاهز.';
+    $('json-status').className = 'json-ok';
+  }
+
+  function formatJson() {
+    try {
+      var v = JSON.parse($('json-editor').value);
+      $('json-editor').value = JSON.stringify(v, null, 2);
+      $('json-status').textContent = '✅ JSON صالح.';
+      $('json-status').className = 'json-ok';
+    } catch (err) {
+      $('json-status').textContent = '❌ ' + err.message;
+      $('json-status').className = 'json-err';
+    }
+  }
+
+  function applyJson() {
+    try {
+      var v = JSON.parse($('json-editor').value);
+      state.currentData = v;
+      $('json-status').textContent = '✅ تم التطبيق على المعاينة.';
+      $('json-status').className = 'json-ok';
+      refreshFormFromState();
+      refreshPreview();
+      updateMeta();
+      log('طُبِّق JSON على الحالة.', 'ok');
+    } catch (err) {
+      $('json-status').textContent = '❌ ' + err.message;
+      $('json-status').className = 'json-err';
+      log('JSON غير صالح: ' + err.message, 'err');
+    }
+  }
+
+  /* ---------------- Form Editor ---------------- */
+  function refreshFormFromState() {
+    var d = state.currentData || {};
+    $('qf-title').value = (d.meta && d.meta.title) || '';
+    $('qf-year').value  = (d.meta && d.meta.schoolYear) || '';
+    $('qf-date').value  = (d.meta && d.meta.evalDate) || '';
+    renderFormEditor();
+  }
+
+  function bindQuickField(id, path, key) {
+    var el = $(id);
+    el.oninput = function () {
+      var v = el.value;
+      var d = state.currentData;
+      if (path === 'meta') { d.meta = d.meta || {}; d.meta[key] = v; }
+      else if (path === 'basicInfo') { d.basicInfo = d.basicInfo || {}; d.basicInfo[key] = v; }
+      onDataChanged();
+    };
+  }
+
+  function onDataChanged() {
+    refreshJsonFromState();
+    refreshPreview();
+    updateMeta();
+  }
+
+  function el(tag, attrs, children) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'class') e.className = attrs[k];
+      else if (k === 'style') e.setAttribute('style', attrs[k]);
+      else if (k.startsWith('data-')) e.setAttribute(k, attrs[k]);
+      else e[k] = attrs[k];
+    });
+    (children || []).forEach(function (c) {
+      if (c == null) return;
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return e;
+  }
+
+  function inputField(labelText, value, onInput, opts) {
+    opts = opts || {};
+    var inp = el('input', {
+      type: opts.type || 'text',
+      value: value == null ? '' : value,
+      style: 'width:100%'
+    });
+    inp.addEventListener('input', function () { onInput(inp.value); });
+    var wrap = el('div', { style: 'margin-bottom:10px' });
+    wrap.appendChild(el('label', { text: labelText }));
+    wrap.appendChild(inp);
+    if (opts.hint) wrap.appendChild(el('div', { class: 'hint', text: opts.hint }));
+    return wrap;
+  }
+
+  function textareaField(labelText, value, onInput, rows) {
+    var ta = el('textarea', { style: 'width:100%', rows: rows || 3 });
+    ta.value = value == null ? '' : value;
+    ta.addEventListener('input', function () { onInput(ta.value); });
+    var wrap = el('div', { style: 'margin-bottom:10px' });
+    wrap.appendChild(el('label', { text: labelText }));
+    wrap.appendChild(ta);
+    return wrap;
+  }
+
+  function renderFormEditor() {
+    var host = $('form-editor');
+    host.innerHTML = '';
+    var d = state.currentData;
+    if (!d) { host.appendChild(el('p', { text: 'حمّل الملف أولاً لعرض الحقول.' })); return; }
+
+    // meta
+    var sectionMeta = el('div', {}, [el('h3', { text: 'Meta' })]);
+    sectionMeta.appendChild(inputField('عنوان النموذج', d.meta.title, function (v) { d.meta.title = v; onDataChanged(); }));
+    sectionMeta.appendChild(inputField('العام الدراسي (العنوان)', d.meta.schoolYear, function (v) { d.meta.schoolYear = v; onDataChanged(); }));
+    sectionMeta.appendChild(inputField('تاريخ التقييم (العنوان)', d.meta.evalDate, function (v) { d.meta.evalDate = v; onDataChanged(); }));
+    host.appendChild(sectionMeta);
+
+    // basic info
+    var sectionBasic = el('div', {}, [el('h3', { text: 'البيانات الأساسية' })]);
+    sectionBasic.appendChild(inputField('اسم المعلمة', d.basicInfo.teacherName, function (v) { d.basicInfo.teacherName = v; onDataChanged(); }));
+    sectionBasic.appendChild(inputField('التخصص / المادة', d.basicInfo.specialty, function (v) { d.basicInfo.specialty = v; onDataChanged(); }));
+    sectionBasic.appendChild(inputField('العام الدراسي', d.basicInfo.schoolYear, function (v) { d.basicInfo.schoolYear = v; onDataChanged(); }));
+    sectionBasic.appendChild(inputField('تاريخ التقييم', d.basicInfo.evalDate, function (v) { d.basicInfo.evalDate = v; onDataChanged(); }));
+    host.appendChild(sectionBasic);
+
+    // grading key
+    var sectionKey = el('div', {}, [el('h3', { text: 'مفتاح الدرجات' })]);
+    sectionKey.appendChild(inputField('مفتاح الدرجات', d.gradingKey, function (v) { d.gradingKey = v; onDataChanged(); }));
+    host.appendChild(sectionKey);
+
+    // sections
+    (d.sections || []).forEach(function (sec, si) {
+      var secDiv = el('div', { style: 'border:1px solid #e5e8ec;border-radius:6px;padding:10px;margin:10px 0;background:#fbfcfd' });
+      secDiv.appendChild(el('h3', { text: sec.title || ('قسم ' + (si + 1)) }));
+      secDiv.appendChild(inputField('عنوان القسم', sec.title, function (v) { sec.title = v; onDataChanged(); }));
+      secDiv.appendChild(inputField('الدرجة الكلية للقسم', sec.maxScore, function (v) { sec.maxScore = v; onDataChanged(); }, { type: 'number' }));
+
+      (sec.domains || []).forEach(function (dom, di) {
+        var domDiv = el('div', { style: 'border:1px dashed #c7d0d8;border-radius:5px;padding:10px;margin:8px 0;background:#fff' });
+        domDiv.appendChild(el('div', { style: 'font-weight:700;color:#1a5276;margin-bottom:6px', text: '↳ المجال ' + (di + 1) }));
+        domDiv.appendChild(inputField('عنوان المجال', dom.title, function (v) { dom.title = v; onDataChanged(); }));
+        domDiv.appendChild(inputField('درجة المجال', dom.score, function (v) { dom.score = v; onDataChanged(); }, { type: 'number' }));
+
+        var ta = el('textarea', { style: 'width:100%;min-height:100px;font-family:inherit', rows: 4 });
+        ta.value = (dom.indicators || []).join('\n');
+        ta.addEventListener('input', function () {
+          dom.indicators = ta.value.split('\n').map(function (s) { return s; }).filter(function (s) { return s.trim() !== ''; });
+          onDataChanged();
+        });
+        var taWrap = el('div', { style: 'margin-bottom:8px' });
+        taWrap.appendChild(el('label', { text: 'المؤشرات (مؤشر واحد في كل سطر)' }));
+        taWrap.appendChild(ta);
+        domDiv.appendChild(taWrap);
+
+        secDiv.appendChild(domDiv);
+      });
+      host.appendChild(secDiv);
+    });
+
+    // critical rule
+    var sectionCrit = el('div', {}, [el('h3', { text: 'قاعدة المؤشر الحرج' })]);
+    sectionCrit.appendChild(textareaField('النص', d.criticalRule, function (v) { d.criticalRule = v; onDataChanged(); }, 3));
+    host.appendChild(sectionCrit);
+
+    // results
+    var sectionRes = el('div', {}, [el('h3', { text: 'التقدير العام' })]);
+    sectionRes.appendChild(inputField('عنوان قسم النتائج', d.resultsTitle, function (v) { d.resultsTitle = v; onDataChanged(); }));
+    sectionRes.appendChild(inputField('سطر مجموع الدرجات', d.totalScoreLine, function (v) { d.totalScoreLine = v; onDataChanged(); }));
+    sectionRes.appendChild(textareaField('طريقة الحساب', d.calcMethod, function (v) { d.calcMethod = v; onDataChanged(); }, 2));
+    host.appendChild(sectionRes);
+
+    // report
+    var sectionRep = el('div', {}, [el('h3', { text: 'التقرير الوصفي' })]);
+    sectionRep.appendChild(inputField('عنوان قسم التقرير', d.reportTitle, function (v) { d.reportTitle = v; onDataChanged(); }));
+    (d.reportSections || []).forEach(function (rs, i) {
+      sectionRep.appendChild(inputField('بند ' + (i + 1), rs, function (v) { d.reportSections[i] = v; onDataChanged(); }));
+    });
+    host.appendChild(sectionRep);
+
+    // signatures
+    var sectionSig = el('div', {}, [el('h3', { text: 'التوقيعات' })]);
+    sectionSig.appendChild(inputField('عنوان قسم التوقيعات', d.signaturesTitle, function (v) { d.signaturesTitle = v; onDataChanged(); }));
+    (d.signatures || []).forEach(function (sig, i) {
+      sectionSig.appendChild(inputField('التوقيع ' + (i + 1) + ' — الوسم', sig.label, function (v) { d.signatures[i].label = v; onDataChanged(); }));
+    });
+    host.appendChild(sectionSig);
+
+    // footer
+    var sectionFooter = el('div', {}, [el('h3', { text: 'التذييل' })]);
+    sectionFooter.appendChild(inputField('نص التذييل', d.footer, function (v) { d.footer = v; onDataChanged(); }));
+    host.appendChild(sectionFooter);
+  }
+
+  /* ---------------- المعاينة ---------------- */
+  var previewTimer = null;
+  function refreshPreview() {
+    if (previewTimer) clearTimeout(previewTimer);
+    previewTimer = setTimeout(function () {
+      if (!state.rawHtml || !state.currentData) return;
+      try {
+        var html = injectData(state.rawHtml, state.currentData);
+        $('preview').srcdoc = html;
+      } catch (e) {
+        log('فشل تحديث المعاينة: ' + e.message, 'err');
+      }
+    }, 250);
+  }
+
+  /* ---------------- تحديث شامل ---------------- */
+  function refreshAllUI() {
+    refreshFormFromState();
+    refreshJsonFromState();
+    refreshPreview();
+    updateMeta();
+    updateQuickFields();
+  }
+
+  function updateQuickFields() {
+    var d = state.currentData || {};
+    $('qf-title').value = (d.meta && d.meta.title) || '';
+    $('qf-year').value  = (d.meta && d.meta.schoolYear) || '';
+    $('qf-date').value  = (d.meta && d.meta.evalDate) || '';
+  }
+
+  /* ---------------- ربط الحقول السريعة ---------------- */
+  function bindQuickFields() {
+    $('qf-title').addEventListener('input', function () {
+      if (!state.currentData) return;
+      state.currentData.meta.title = $('qf-title').value;
+      onDataChanged();
+      renderFormEditor();
+    });
+    $('qf-year').addEventListener('input', function () {
+      if (!state.currentData) return;
+      state.currentData.meta.schoolYear = $('qf-year').value;
+      onDataChanged();
+      renderFormEditor();
+    });
+    $('qf-date').addEventListener('input', function () {
+      if (!state.currentData) return;
+      state.currentData.meta.evalDate = $('qf-date').value;
+      onDataChanged();
+      renderFormEditor();
+    });
+  }
+
+  /* ---------------- تهيئة ---------------- */
+  function init() {
+    loadConfig();
+    bindQuickFields();
+    log('جاهز. أدخل إعدادات GitHub ثم اضغط "تحميل من GitHub".');
+    setStatus('بانتظار التحميل', '');
+  }
+
+  window.saveConfig = saveConfig;
+  window.clearConfig = clearConfig;
+  window.loadFromGitHub = loadFromGitHub;
+  window.saveToGitHub = saveToGitHub;
+  window.loadLocalFile = loadLocalFile;
+  window.resetToLoaded = resetToLoaded;
+  window.revertAll = revertAll;
+  window.downloadHtml = downloadHtml;
+  window.switchTab = switchTab;
+  window.formatJson = formatJson;
+  window.applyJson = applyJson;
+  window.refreshJsonFromState = refreshJsonFromState;
+
+  init();
+})();
+</script>
+</body>
+</html>
