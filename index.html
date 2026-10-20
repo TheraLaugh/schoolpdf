@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نموذج تقييم الأداء الشامل للمعلمة</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Amiri', 'Traditional Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+    direction: rtl; text-align: right; color: #1c2833;
+    background: #eef1f5; padding: 20px; line-height: 1.75; font-size: 15px;
+  }
+  .container {
+    max-width: 900px; margin: 0 auto; background: #fff;
+    padding: 32px 36px; border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  }
+  h1 { font-size: 25px; text-align: center; color: #154360; margin: 0 0 6px; letter-spacing: 0; }
+  .subtitle { text-align: center; color: #566573; margin-bottom: 26px; font-size: 14px; }
+  h2 {
+    font-size: 17px; color: #1a5276; margin: 30px 0 12px;
+    padding-bottom: 6px; border-bottom: 2px solid #1a5276;
+    page-break-after: avoid;
+  }
+  h3 { font-size: 15px; color: #21618c; margin: 18px 0 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; page-break-inside: avoid; }
+  th, td { border: 1px solid #b0bec5; padding: 9px 11px; vertical-align: top; font-size: 14px; }
+  th { background: #eaf2f8; font-weight: 700; color: #1a5276; }
+  td.score-col { width: 70px; text-align: center; background: #fbfcfd; }
+  ul { margin: 4px 0; padding-right: 22px; }
+  li { margin: 3px 0; }
+  .critical-rule {
+    background: #fff8e1; border: 1px solid #ffe082;
+    border-right: 5px solid #f39c12; padding: 12px 14px;
+    border-radius: 5px; margin: 18px 0; font-size: 14px;
+    page-break-inside: avoid;
+  }
+  .critical-rule strong { color: #b9770e; display: block; margin-bottom: 4px; }
+  .report-box {
+    border: 1px dashed #90a4ae; min-height: 60px;
+    background: #fafbfc; border-radius: 4px;
+    margin: 6px 0 16px; padding: 10px;
+  }
+  .grade-bands { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+  .grade-band {
+    flex: 1 1 130px; border: 1px solid #b0bec5; border-radius: 5px;
+    padding: 10px; text-align: center; background: #f8fbfd;
+  }
+  .grade-band .range { font-weight: 700; color: #1a5276; font-size: 15px; }
+  .grade-band .label { font-size: 13px; color: #566573; margin-top: 2px; }
+  .total-line {
+    font-size: 16px; font-weight: 700; color: #154360;
+    padding: 12px 14px; background: #eaf2f8;
+    border-right: 5px solid #1a5276; border-radius: 4px; margin: 12px 0;
+  }
+  .signature-table td { text-align: center; height: 95px; vertical-align: bottom; padding-bottom: 12px; width: 50%; }
+  .footer-text { text-align: center; color: #566573; margin-top: 26px; font-size: 14px; font-weight: 600; }
+  .no-print { text-align: center; margin: 26px 0 6px; }
+  .btn {
+    display: inline-block; padding: 11px 26px; background: #1a5276; color: #fff;
+    border: none; border-radius: 6px; font-size: 15px; cursor: pointer;
+    font-family: inherit; transition: background .15s;
+  }
+  .btn:hover { background: #154360; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 13px; }
+    .container { box-shadow: none; border-radius: 0; padding: 0; max-width: none; }
+    .no-print { display: none !important; }
+    h2 { margin-top: 22px; }
+    .critical-rule, table, .report-box, .grade-bands { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="form-root"></div>
+  <div class="no-print">
+    <button class="btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+  </div>
+</div>
+
+<!-- ▼▼▼ بيانات النموذج (تُعدَّل من لوحة الإدارة) ▼▼▼ -->
+<script id="app-data" type="application/json">
+{
+  "meta": {
+    "title": "نموذج تقييم الأداء الشامل للمعلمة",
+    "schoolYear": "العام الدراسي: ............",
+    "evalDate": "تاريخ التقييم: ............"
+  },
+  "basicInfo": {
+    "teacherName": "",
+    "specialty": "",
+    "schoolYear": "",
+    "evalDate": ""
+  },
+  "gradingKey": "5 = ممتاز | 4 = جيد جداً | 3 = جيد | 2 = مقبول | 1 = ضعيف",
+  "sections": [
+    {
+      "title": "القسم الأول: التقييم الأكاديمي والتعليمي",
+      "maxScore": 50,
+      "domains": [
+        {
+          "title": "التخطيط والتحضير",
+          "score": 10,
+          "indicators": [
+            "إعداد خطة التعلم والدروس اليومية والفصلية بشكل منظم وسليم.",
+            "صياغة أهداف تعليمية سلوكية واضحة وقابلة للقياس.",
+            "تجهيز المواد والوسائل مسبقاً وربط الدرس بالخبرات السابقة."
+          ]
+        },
+        {
+          "title": "استراتيجيات التدريس",
+          "score": 10,
+          "indicators": [
+            "التنوع في استخدام استراتيجيات التدريس الحديثة والنشطة.",
+            "توظيف وسائل التعلم الرقمية والتقنيات بفاعلية.",
+            "مراعاة الفروق الفردية بين الطلاب أثناء الشرح والأنشطة."
+          ]
+        },
+        {
+          "title": "الإدارة الصفية",
+          "score": 10,
+          "indicators": [
+            "تهيئة بيئة تعليمية جاذبة وآمنة ومحفزة للطلاب.",
+            "القدرة على ضبط الصف واستثمار وقت الحصة بذكاء.",
+            "إدارة السلوكيات الإيجابية والتعامل مع المخالفات بهدوء ومهنية."
+          ]
+        },
+        {
+          "title": "التقويم والتحصيل",
+          "score": 10,
+          "indicators": [
+            "تنوع أساليب التقويم (تشخيصي، تكويني، ختامي).",
+            "تقديم التغذية الراجعة الفورية والبناءة لتصحيح مسار الطالب.",
+            "تحليل نتائج الطلاب ووضع خطط علاجية وإثرائية واضحة."
+          ]
+        },
+        {
+          "title": "التطوير المهني",
+          "score": 10,
+          "indicators": [
+            "الحضور والمشاركة الفاعلة في الاجتماعات المدرسية ومجالس التطوير.",
+            "الالتزام بحضور الدورات التدريبية والورش لتطوير الأداء.",
+            "تطبيق ما يتم تعلمه من التدريب داخل الصف ومتابعة أثره."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "القسم الثاني: التقييم الإداري",
+      "maxScore": 50,
+      "domains": [
+        {
+          "title": "الانضباط والدوام",
+          "score": 10,
+          "indicators": [
+            "الالتزام بمواعيد الحضور والانصراف بدقة دون تأخير غير مبرر.",
+            "عدم الغياب إلا بأعذار رسمية والالتزام بجدول الحصص.",
+            "الاستعداد المبكر لبدء اليوم الدراسي والحصة."
+          ]
+        },
+        {
+          "title": "المهام والمسؤوليات",
+          "score": 10,
+          "indicators": [
+            "الالتزام التام بجدول الإشراف اليومي (المناوبة في الساحات/الممرات).",
+            "المشاركة الفاعلة في الإذاعة الصباحية (إعداد أو إشراف أو تقديم).",
+            "إنجاز التكليفات الإدارية الصادرة عن إدارة المدرسة في الوقت المحدد.",
+            "المشاركة والعمل على الأنشطة والرحلات العلمية والترفيهية."
+          ]
+        },
+        {
+          "title": "جودة التنفيذ والتوثيق والأثر الإداري",
+          "score": 10,
+          "indicators": [
+            "دقة التقارير والسجلات واكتمال الوثائق المطلوبة.",
+            "الالتزام بمواعيد التسليم وتقليل الأخطاء والتكرار.",
+            "وضوح أثر المهام الإدارية (تحسن في الدقة أو انخفاض الشكاوى)."
+          ]
+        },
+        {
+          "title": "التواصل والشراكة مع أولياء الأمور",
+          "score": 10,
+          "indicators": [
+            "التواصل الإيجابي والسريع مع أولياء الأمور عبر القنوات الرسمية.",
+            "توثيق التواصل ومعالجة الشكاوى ومتابعة الحالات.",
+            "اقتراح أفكار تحسينية ودعم الزميلات الجدد بروح التعاون."
+          ]
+        },
+        {
+          "title": "الالتزام والحماية والسلامة",
+          "score": 10,
+          "indicators": [
+            "الالتزام باللوائح والأنظمة المدرسية والتعليمية.",
+            "الحفاظ على سرية معلومات الطالب وإجراءات السلامة والإخلاء.",
+            "التعامل التربوي مع الطالب وعدم التلفظ بألفاظ مسيئة أو نابية.",
+            "التعامل المهني مع الحالات الحرجة وتمثيل المدرسة بإيجابية."
+          ]
+        }
+      ]
+    }
+  ],
+  "criticalRule": "إذا وقع قصور جوهري في السرية أو السلامة أو الحضور دون عذر أو رفض التكليفات الإدارية أو التلفظ بألفاظ مسيئة/نابية مع الطالب، فلا يجوز أن يحصل المجال المعني على أكثر من درجتين (2)، حتى لو تحسنت مؤشرات أخرى.",
+  "resultsTitle": "ثالثاً: التقدير العام والنتائج",
+  "totalScoreLine": "مجموع الدرجات المستحقة: ......... من 100 درجة",
+  "gradeBands": [
+    { "range": "90 - 100", "label": "ممتاز" },
+    { "range": "80 - 89",  "label": "جيد جداً" },
+    { "range": "70 - 79",  "label": "جيد" },
+    { "range": "50 - 69",  "label": "مقبول" },
+    { "range": "أقل من 50", "label": "ضعيف" }
+  ],
+  "calcMethod": "كل مجال يُقيّم من 1 إلى 5 ثم يُضرب في 2 للحصول على درجة من 10. مجموع القسمين = 100 درجة.",
+  "reportTitle": "رابعاً: التقرير الوصفي والتوصيات",
+  "reportSections": [
+    "أبرز نقاط القوة (الأكاديمية والإدارية).",
+    "جوانب التحسين وفرص التطوير.",
+    "التوصيات والخطوات القادمة."
+  ],
+  "signaturesTitle": "خامساً: التوقيعات",
+  "signatures": [
+    { "label": "توقيع المعلمة", "value": "..................." },
+    { "label": "توقيع المشرف الأكاديمي / مديرة المدرسة", "value": "..................." }
+  ],
+  "footer": "مديرة المدرسة"
+}
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var data = JSON.parse(document.getElementById('app-data').textContent);
+  document.getElementById('form-root').innerHTML = renderForm(data);
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function renderForm(d) {
+    var out = [];
+    out.push('<h1>' + esc(d.meta.title) + '</h1>');
+    var sub = [d.meta.schoolYear, d.meta.evalDate].filter(Boolean).join(' &nbsp;|&nbsp; ');
+    if (sub) out.push('<div class="subtitle">' + sub + '</div>');
+
+    var bi = d.basicInfo || {};
+    out.push('<h2>أولاً: البيانات الأساسية</h2>');
+    out.push('<table>' +
+      '<tr><th style="width:50%">اسم المعلمة</th><th>التخصص / المادة</th></tr>' +
+      '<tr><td>' + esc(bi.teacherName) + '</td><td>' + esc(bi.specialty) + '</td></tr>' +
+      '<tr><th>العام الدراسي</th><th>تاريخ التقييم</th></tr>' +
+      '<tr><td>' + esc(bi.schoolYear) + '</td><td>' + esc(bi.evalDate) + '</td></tr>' +
+      '</table>');
+
+    out.push('<p style="margin:8px 0;color:#566573"><strong>مفتاح الدرجات:</strong> ' + esc(d.gradingKey) + '</p>');
+
+    (d.sections || []).forEach(function (sec) {
+      out.push('<h2>' + esc(sec.title) + ' &nbsp;(' + esc(sec.maxScore) + ' درجة)</h2>');
+      out.push('<table>' +
+        '<thead><tr>' +
+        '<th style="width:28%">المجال الرئيسي</th>' +
+        '<th>المؤشرات الفرعية والأداء المتوقع</th>' +
+        '<th class="score-col">الدرجة (1-5)</th>' +
+        '</tr></thead><tbody>');
+      (sec.domains || []).forEach(function (dom) {
+        var inds = (dom.indicators || []).map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('');
+        out.push('<tr>' +
+          '<td><strong>' + esc(dom.title) + '</strong><br><span style="color:#566573">(' + esc(dom.score) + ' درجات)</span></td>' +
+          '<td><ul>' + inds + '</ul></td>' +
+          '<td class="score-col"></td>' +
+          '</tr>');
+      });
+      out.push('</tbody></table>');
+    });
+
+    if (d.criticalRule) {
+      out.push('<div class="critical-rule"><strong>⚠ قاعدة المؤشر الحرج</strong>' + esc(d.criticalRule) + '</div>');
+    }
+
+    out.push('<h2>' + esc(d.resultsTitle) + '</h2>');
+    out.push('<div class="total-line">' + esc(d.totalScoreLine) + '</div>');
+    if (d.gradeBands && d.gradeBands.length) {
+      out.push('<div class="grade-bands">');
+      d.gradeBands.forEach(function (b) {
+        out.push('<div class="grade-band"><div class="range">' + esc(b.range) + '</div><div class="label">' + esc(b.label) + '</div></div>');
+      });
+      out.push('</div>');
+    }
+    out.push('<p><strong>طريقة الحساب:</strong> ' + esc(d.calcMethod) + '</p>');
+
+    out.push('<h2>' + esc(d.reportTitle) + '</h2>');
+    (d.reportSections || []).forEach(function (r) {
+      out.push('<h3>• ' + esc(r) + '</h3><div class="report-box"></div>');
+    });
+
+    out.push('<h2>' + esc(d.signaturesTitle) + '</h2>');
+    out.push('<table class="signature-table"><tr>');
+    (d.signatures || []).forEach(function (sig) {
+      out.push('<td><strong>' + esc(sig.label) + ':</strong><br><br>' + esc(sig.value || '...................') + '</td>');
+    });
+    out.push('</tr></table>');
+
+    if (d.footer) out.push('<div class="footer-text">' + esc(d.footer) + '</div>');
+
+    return out.join('\n');
+  }
+})();
+</script>
+</body>
+</html>
