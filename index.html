@@ -9,69 +9,104 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: 'Amiri', 'Traditional Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
-    direction: rtl; text-align: right; color: #1c2833;
-    background: #eef1f5; padding: 20px; line-height: 1.75; font-size: 15px;
+    --p:  #1a5276;
+    --pd: #154360;
+    --a:  #2874a6;
+    --bg:#eef1f5;
+    --paper: #ffffff;
+    --fg: #1c2833;
+    --fgm:#566573;
+    --bd: #b0bec5;
+    --th: #eaf2f8;
+    --hl: #fff8e1;
+    --hlb:#ffe082;
+    --hls:#f39c12;
+    --font: 'Amiri', 'Traditional Arabic', Arial, sans-serif;
+  }
+
+  /* ---------- Themes ---------- */
+  body[data-theme="modern"] {
+    --p:#6c5ce7; --pd:#4834d4; --a:#a29bfe; --th:#ede9ff; --hls:#6c5ce7;
+  }
+  body[data-theme="minimal"] {
+    --p:#2d3436; --pd:#1a1d1f; --a:#636e72; --th:#f5f6fa;
+    --bg:#f8f9fa; --hls:#b2bec3;
+  }
+  body[data-theme="academic"] {
+    --p:#7b341e; --pd:#5c2412; --a:#b7791f; --th:#fdf6e3;
+    --bg:#f4ecd8; --hls:#b7791f; --font:'Amiri','Times New Roman',serif;
+  }
+  body[data-theme="colorful"] {
+    --p:#e17055; --pd:#c44536; --a:#0984e3; --th:#ffeaa7;
+    --bg:#fef9ef; --hls:#e17055;
+  }
+  body[data-theme="dark"] {
+    --p:#74b9ff; --pd:#0984e3; --a:#a29bfe;
+    --bg:#0f172a; --paper:#1e293b; --fg:#e2e8f0; --fgm:#94a3b8;
+    --bd:#334155; --th:#1e3a8a;
+    --hl:#422006; --hlb:#78350f; --hls:#f39c12;
+  }
+
+  body {
+    font-family: var(--font);
+    direction: rtl; text-align: right; color: var(--fg);
+    background: var(--bg); padding: 20px; line-height: 1.75; font-size: 15px;
   }
   .container {
-    max-width: 900px; margin: 0 auto; background: #fff;
+    max-width: 900px; margin: 0 auto; background: var(--paper);
     padding: 32px 36px; border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.07);
   }
-  h1 { font-size: 25px; text-align: center; color: #154360; margin: 0 0 6px; letter-spacing: 0; }
-  .subtitle { text-align: center; color: #566573; margin-bottom: 26px; font-size: 14px; }
+  h1 { font-size: 25px; text-align: center; color: var(--p); margin: 0 0 6px; }
+  .subtitle { text-align: center; color: var(--fgm); margin-bottom: 26px; font-size: 14px; }
   h2 {
-    font-size: 17px; color: #1a5276; margin: 30px 0 12px;
-    padding-bottom: 6px; border-bottom: 2px solid #1a5276;
-    page-break-after: avoid;
+    font-size: 17px; color: var(--p); margin: 30px 0 12px;
+    padding-bottom: 6px; border-bottom: 2px solid var(--p); page-break-after: avoid;
   }
-  h3 { font-size: 15px; color: #21618c; margin: 18px 0 6px; }
+  h3 { font-size: 15px; color: var(--a); margin: 18px 0 6px; }
   table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; page-break-inside: avoid; }
-  th, td { border: 1px solid #b0bec5; padding: 9px 11px; vertical-align: top; font-size: 14px; }
-  th { background: #eaf2f8; font-weight: 700; color: #1a5276; }
-  td.score-col { width: 70px; text-align: center; background: #fbfcfd; }
+  th, td { border: 1px solid var(--bd); padding: 9px 11px; vertical-align: top; font-size: 14px; }
+  th { background: var(--th); font-weight: 700; color: var(--p); }
+  td.score-col { width: 70px; text-align: center; }
   ul { margin: 4px 0; padding-right: 22px; }
   li { margin: 3px 0; }
   .critical-rule {
-    background: #fff8e1; border: 1px solid #ffe082;
-    border-right: 5px solid #f39c12; padding: 12px 14px;
-    border-radius: 5px; margin: 18px 0; font-size: 14px;
-    page-break-inside: avoid;
+    background: var(--hl); border: 1px solid var(--hlb);
+    border-right: 5px solid var(--hls); padding: 12px 14px;
+    border-radius: 5px; margin: 18px 0; font-size: 14px; page-break-inside: avoid;
   }
-  .critical-rule strong { color: #b9770e; display: block; margin-bottom: 4px; }
+  .critical-rule strong { color: var(--hls); display: block; margin-bottom: 4px; }
   .report-box {
-    border: 1px dashed #90a4ae; min-height: 60px;
-    background: #fafbfc; border-radius: 4px;
+    border: 1px dashed var(--bd); min-height: 60px;
+    background: rgba(0,0,0,0.02); border-radius: 4px;
     margin: 6px 0 16px; padding: 10px;
   }
   .grade-bands { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
   .grade-band {
-    flex: 1 1 130px; border: 1px solid #b0bec5; border-radius: 5px;
-    padding: 10px; text-align: center; background: #f8fbfd;
+    flex: 1 1 130px; border: 1px solid var(--bd); border-radius: 5px;
+    padding: 10px; text-align: center; background: var(--th);
   }
-  .grade-band .range { font-weight: 700; color: #1a5276; font-size: 15px; }
-  .grade-band .label { font-size: 13px; color: #566573; margin-top: 2px; }
+  .grade-band .range { font-weight: 700; color: var(--p); font-size: 15px; }
+  .grade-band .label { font-size: 13px; color: var(--fgm); margin-top: 2px; }
   .total-line {
-    font-size: 16px; font-weight: 700; color: #154360;
-    padding: 12px 14px; background: #eaf2f8;
-    border-right: 5px solid #1a5276; border-radius: 4px; margin: 12px 0;
+    font-size: 16px; font-weight: 700; color: var(--p);
+    padding: 12px 14px; background: var(--th);
+    border-right: 5px solid var(--p); border-radius: 4px; margin: 12px 0;
   }
   .signature-table td { text-align: center; height: 95px; vertical-align: bottom; padding-bottom: 12px; width: 50%; }
-  .footer-text { text-align: center; color: #566573; margin-top: 26px; font-size: 14px; font-weight: 600; }
+  .footer-text { text-align: center; color: var(--fgm); margin-top: 26px; font-size: 14px; font-weight: 600; }
   .no-print { text-align: center; margin: 26px 0 6px; }
   .btn {
-    display: inline-block; padding: 11px 26px; background: #1a5276; color: #fff;
+    display: inline-block; padding: 11px 26px; background: var(--p); color: #fff;
     border: none; border-radius: 6px; font-size: 15px; cursor: pointer;
     font-family: inherit; transition: background .15s;
   }
-  .btn:hover { background: #154360; }
-
+  .btn:hover { background: var(--pd); }
   @media print {
     body { background: #fff; padding: 0; font-size: 13px; }
     .container { box-shadow: none; border-radius: 0; padding: 0; max-width: none; }
     .no-print { display: none !important; }
     h2 { margin-top: 22px; }
-    .critical-rule, table, .report-box, .grade-bands { page-break-inside: avoid; }
   }
 </style>
 </head>
@@ -83,7 +118,7 @@
   </div>
 </div>
 
-<!-- ▼▼▼ بيانات النموذج (تُعدَّل من لوحة الإدارة) ▼▼▼ -->
+<!-- ▼▼▼ بيانات النموذج (تُعدَّل من admin.html) ▼▼▼ -->
 <script id="app-data" type="application/json">
 {
   "meta": {
@@ -91,6 +126,7 @@
     "schoolYear": "العام الدراسي: ............",
     "evalDate": "تاريخ التقييم: ............"
   },
+  "theme": "classic",
   "basicInfo": {
     "teacherName": "",
     "specialty": "",
@@ -103,104 +139,64 @@
       "title": "القسم الأول: التقييم الأكاديمي والتعليمي",
       "maxScore": 50,
       "domains": [
-        {
-          "title": "التخطيط والتحضير",
-          "score": 10,
-          "indicators": [
-            "إعداد خطة التعلم والدروس اليومية والفصلية بشكل منظم وسليم.",
-            "صياغة أهداف تعليمية سلوكية واضحة وقابلة للقياس.",
-            "تجهيز المواد والوسائل مسبقاً وربط الدرس بالخبرات السابقة."
-          ]
-        },
-        {
-          "title": "استراتيجيات التدريس",
-          "score": 10,
-          "indicators": [
-            "التنوع في استخدام استراتيجيات التدريس الحديثة والنشطة.",
-            "توظيف وسائل التعلم الرقمية والتقنيات بفاعلية.",
-            "مراعاة الفروق الفردية بين الطلاب أثناء الشرح والأنشطة."
-          ]
-        },
-        {
-          "title": "الإدارة الصفية",
-          "score": 10,
-          "indicators": [
-            "تهيئة بيئة تعليمية جاذبة وآمنة ومحفزة للطلاب.",
-            "القدرة على ضبط الصف واستثمار وقت الحصة بذكاء.",
-            "إدارة السلوكيات الإيجابية والتعامل مع المخالفات بهدوء ومهنية."
-          ]
-        },
-        {
-          "title": "التقويم والتحصيل",
-          "score": 10,
-          "indicators": [
-            "تنوع أساليب التقويم (تشخيصي، تكويني، ختامي).",
-            "تقديم التغذية الراجعة الفورية والبناءة لتصحيح مسار الطالب.",
-            "تحليل نتائج الطلاب ووضع خطط علاجية وإثرائية واضحة."
-          ]
-        },
-        {
-          "title": "التطوير المهني",
-          "score": 10,
-          "indicators": [
-            "الحضور والمشاركة الفاعلة في الاجتماعات المدرسية ومجالس التطوير.",
-            "الالتزام بحضور الدورات التدريبية والورش لتطوير الأداء.",
-            "تطبيق ما يتم تعلمه من التدريب داخل الصف ومتابعة أثره."
-          ]
-        }
+        { "title": "التخطيط والتحضير", "score": 10, "indicators": [
+          "إعداد خطة التعلم والدروس اليومية والفصلية بشكل منظم وسليم.",
+          "صياغة أهداف تعليمية سلوكية واضحة وقابلة للقياس.",
+          "تجهيز المواد والوسائل مسبقاً وربط الدرس بالخبرات السابقة."
+        ]},
+        { "title": "استراتيجيات التدريس", "score": 10, "indicators": [
+          "التنوع في استخدام استراتيجيات التدريس الحديثة والنشطة.",
+          "توظيف وسائل التعلم الرقمية والتقنيات بفاعلية.",
+          "مراعاة الفروق الفردية بين الطلاب أثناء الشرح والأنشطة."
+        ]},
+        { "title": "الإدارة الصفية", "score": 10, "indicators": [
+          "تهيئة بيئة تعليمية جاذبة وآمنة ومحفزة للطلاب.",
+          "القدرة على ضبط الصف واستثمار وقت الحصة بذكاء.",
+          "إدارة السلوكيات الإيجابية والتعامل مع المخالفات بهدوء ومهنية."
+        ]},
+        { "title": "التقويم والتحصيل", "score": 10, "indicators": [
+          "تنوع أساليب التقويم (تشخيصي، تكويني، ختامي).",
+          "تقديم التغذية الراجعة الفورية والبناءة لتصحيح مسار الطالب.",
+          "تحليل نتائج الطلاب ووضع خطط علاجية وإثرائية واضحة."
+        ]},
+        { "title": "التطوير المهني", "score": 10, "indicators": [
+          "الحضور والمشاركة الفاعلة في الاجتماعات المدرسية ومجالس التطوير.",
+          "الالتزام بحضور الدورات التدريبية والورش لتطوير الأداء.",
+          "تطبيق ما يتم تعلمه من التدريب داخل الصف ومتابعة أثره."
+        ]}
       ]
     },
     {
       "title": "القسم الثاني: التقييم الإداري",
       "maxScore": 50,
       "domains": [
-        {
-          "title": "الانضباط والدوام",
-          "score": 10,
-          "indicators": [
-            "الالتزام بمواعيد الحضور والانصراف بدقة دون تأخير غير مبرر.",
-            "عدم الغياب إلا بأعذار رسمية والالتزام بجدول الحصص.",
-            "الاستعداد المبكر لبدء اليوم الدراسي والحصة."
-          ]
-        },
-        {
-          "title": "المهام والمسؤوليات",
-          "score": 10,
-          "indicators": [
-            "الالتزام التام بجدول الإشراف اليومي (المناوبة في الساحات/الممرات).",
-            "المشاركة الفاعلة في الإذاعة الصباحية (إعداد أو إشراف أو تقديم).",
-            "إنجاز التكليفات الإدارية الصادرة عن إدارة المدرسة في الوقت المحدد.",
-            "المشاركة والعمل على الأنشطة والرحلات العلمية والترفيهية."
-          ]
-        },
-        {
-          "title": "جودة التنفيذ والتوثيق والأثر الإداري",
-          "score": 10,
-          "indicators": [
-            "دقة التقارير والسجلات واكتمال الوثائق المطلوبة.",
-            "الالتزام بمواعيد التسليم وتقليل الأخطاء والتكرار.",
-            "وضوح أثر المهام الإدارية (تحسن في الدقة أو انخفاض الشكاوى)."
-          ]
-        },
-        {
-          "title": "التواصل والشراكة مع أولياء الأمور",
-          "score": 10,
-          "indicators": [
-            "التواصل الإيجابي والسريع مع أولياء الأمور عبر القنوات الرسمية.",
-            "توثيق التواصل ومعالجة الشكاوى ومتابعة الحالات.",
-            "اقتراح أفكار تحسينية ودعم الزميلات الجدد بروح التعاون."
-          ]
-        },
-        {
-          "title": "الالتزام والحماية والسلامة",
-          "score": 10,
-          "indicators": [
-            "الالتزام باللوائح والأنظمة المدرسية والتعليمية.",
-            "الحفاظ على سرية معلومات الطالب وإجراءات السلامة والإخلاء.",
-            "التعامل التربوي مع الطالب وعدم التلفظ بألفاظ مسيئة أو نابية.",
-            "التعامل المهني مع الحالات الحرجة وتمثيل المدرسة بإيجابية."
-          ]
-        }
+        { "title": "الانضباط والدوام", "score": 10, "indicators": [
+          "الالتزام بمواعيد الحضور والانصراف بدقة دون تأخير غير مبرر.",
+          "عدم الغياب إلا بأعذار رسمية والالتزام بجدول الحصص.",
+          "الاستعداد المبكر لبدء اليوم الدراسي والحصة."
+        ]},
+        { "title": "المهام والمسؤوليات", "score": 10, "indicators": [
+          "الالتزام التام بجدول الإشراف اليومي (المناوبة في الساحات/الممرات).",
+          "المشاركة الفاعلة في الإذاعة الصباحية (إعداد أو إشراف أو تقديم).",
+          "إنجاز التكليفات الإدارية الصادرة عن إدارة المدرسة في الوقت المحدد.",
+          "المشاركة والعمل على الأنشطة والرحلات العلمية والترفيهية."
+        ]},
+        { "title": "جودة التنفيذ والتوثيق والأثر الإداري", "score": 10, "indicators": [
+          "دقة التقارير والسجلات واكتمال الوثائق المطلوبة.",
+          "الالتزام بمواعيد التسليم وتقليل الأخطاء والتكرار.",
+          "وضوح أثر المهام الإدارية (تحسن في الدقة أو انخفاض الشكاوى)."
+        ]},
+        { "title": "التواصل والشراكة مع أولياء الأمور", "score": 10, "indicators": [
+          "التواصل الإيجابي والسريع مع أولياء الأمور عبر القنوات الرسمية.",
+          "توثيق التواصل ومعالجة الشكاوى ومتابعة الحالات.",
+          "اقتراح أفكار تحسينية ودعم الزميلات الجدد بروح التعاون."
+        ]},
+        { "title": "الالتزام والحماية والسلامة", "score": 10, "indicators": [
+          "الالتزام باللوائح والأنظمة المدرسية والتعليمية.",
+          "الحفاظ على سرية معلومات الطالب وإجراءات السلامة والإخلاء.",
+          "التعامل التربوي مع الطالب وعدم التلفظ بألفاظ مسيئة أو نابية.",
+          "التعامل المهني مع الحالات الحرجة وتمثيل المدرسة بإيجابية."
+        ]}
       ]
     }
   ],
@@ -234,14 +230,14 @@
 (function () {
   'use strict';
   var data = JSON.parse(document.getElementById('app-data').textContent);
+  document.body.dataset.theme = data.theme || 'classic';
   document.getElementById('form-root').innerHTML = renderForm(data);
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
     });
   }
-
   function renderForm(d) {
     var out = [];
     out.push('<h1>' + esc(d.meta.title) + '</h1>');
@@ -256,31 +252,23 @@
       '<tr><th>العام الدراسي</th><th>تاريخ التقييم</th></tr>' +
       '<tr><td>' + esc(bi.schoolYear) + '</td><td>' + esc(bi.evalDate) + '</td></tr>' +
       '</table>');
-
-    out.push('<p style="margin:8px 0;color:#566573"><strong>مفتاح الدرجات:</strong> ' + esc(d.gradingKey) + '</p>');
+    out.push('<p style="margin:8px 0;color:var(--fgm)"><strong>مفتاح الدرجات:</strong> ' + esc(d.gradingKey) + '</p>');
 
     (d.sections || []).forEach(function (sec) {
       out.push('<h2>' + esc(sec.title) + ' &nbsp;(' + esc(sec.maxScore) + ' درجة)</h2>');
-      out.push('<table>' +
-        '<thead><tr>' +
+      out.push('<table><thead><tr>' +
         '<th style="width:28%">المجال الرئيسي</th>' +
         '<th>المؤشرات الفرعية والأداء المتوقع</th>' +
-        '<th class="score-col">الدرجة (1-5)</th>' +
-        '</tr></thead><tbody>');
+        '<th class="score-col">الدرجة (1-5)</th></tr></thead><tbody>');
       (sec.domains || []).forEach(function (dom) {
         var inds = (dom.indicators || []).map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('');
-        out.push('<tr>' +
-          '<td><strong>' + esc(dom.title) + '</strong><br><span style="color:#566573">(' + esc(dom.score) + ' درجات)</span></td>' +
-          '<td><ul>' + inds + '</ul></td>' +
-          '<td class="score-col"></td>' +
-          '</tr>');
+        out.push('<tr><td><strong>' + esc(dom.title) + '</strong><br><span style="color:var(--fgm)">(' + esc(dom.score) + ' درجات)</span></td>' +
+          '<td><ul>' + inds + '</ul></td><td class="score-col"></td></tr>');
       });
       out.push('</tbody></table>');
     });
 
-    if (d.criticalRule) {
-      out.push('<div class="critical-rule"><strong>⚠ قاعدة المؤشر الحرج</strong>' + esc(d.criticalRule) + '</div>');
-    }
+    if (d.criticalRule) out.push('<div class="critical-rule"><strong>⚠ قاعدة المؤشر الحرج</strong>' + esc(d.criticalRule) + '</div>');
 
     out.push('<h2>' + esc(d.resultsTitle) + '</h2>');
     out.push('<div class="total-line">' + esc(d.totalScoreLine) + '</div>');
@@ -306,7 +294,6 @@
     out.push('</tr></table>');
 
     if (d.footer) out.push('<div class="footer-text">' + esc(d.footer) + '</div>');
-
     return out.join('\n');
   }
 })();
